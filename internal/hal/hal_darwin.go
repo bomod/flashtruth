@@ -112,3 +112,15 @@ func InspectDriveHardware(targetDrive string) (model.DriveInfo, model.USBTopolog
 	}
 	return drv, usb, mbrHex, nil
 }
+
+// ExecuteLiveHardwareClamp repartitions and formats the drive to safeBytes on macOS.
+func ExecuteLiveHardwareClamp(drv model.DriveInfo, safeBytes uint64, label string) error {
+	if drv.IsSystemBoot {
+		return fmt.Errorf("refusing to clamp system boot drive")
+	}
+	safeMB := safeBytes / (1024 * 1024)
+	if label == "" {
+		label = "FLASH_SAFE"
+	}
+	return exec.Command("diskutil", "partitionDisk", drv.PhysicalDiskPath, "MBR", "ExFAT", label, fmt.Sprintf("%dM", safeMB), "FreeSpace", "R").Run()
+}

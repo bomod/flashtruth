@@ -277,3 +277,16 @@ func InspectDriveHardware(targetDrive string) (model.DriveInfo, model.USBTopolog
 	}
 	return drv, usb, mbrHex, nil
 }
+
+// ExecuteLiveHardwareClamp repartitions and formats the drive to safeBytes on Linux.
+func ExecuteLiveHardwareClamp(drv model.DriveInfo, safeBytes uint64, label string) error {
+	if drv.IsSystemBoot {
+		return fmt.Errorf("refusing to clamp system boot drive")
+	}
+	safeMB := safeBytes / (1024 * 1024)
+	if label == "" {
+		label = "FLASH_SAFE"
+	}
+	cmdStr := fmt.Sprintf("parted -s %s mklabel msdos mkpart primary 1MiB %dMiB && mkfs.exfat -n %s %s1", drv.PhysicalDiskPath, safeMB, label, drv.PhysicalDiskPath)
+	return exec.Command("sh", "-c", cmdStr).Run()
+}

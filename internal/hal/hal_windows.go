@@ -527,3 +527,107 @@ $health = if ($pd -and $pd.HealthStatus) { [string]$pd.HealthStatus } else { "He
 	parsed.Drive.ReportedSizeGB = float64(parsed.Drive.ReportedSizeBytes) / 1e9
 	return parsed.Drive, parsed.USB, parsed.MBRHex, nil
 }
+
+const (
+	ioctlDiskUpdateProperties = 0x00070140
+	fsctlDismountVolume       = 0x00090020
+)
+
+func sendSCSIRW10(h syscall.Handle, isWrite bool, lba uint32, blocks uint16, dataBuf []byte) bool {
+	var pkt scsiPassThroughDirectWithBuffer
+	pkt.sptd.Length = uint16(unsafe.Sizeof(pkt.sptd))
+	pkt.sptd.CdbLength = 10
+	pkt.sptd.SenseInfoLength = 32
+	if isWrite {
+		pkt.sptd.DataIn = 0 // SCSI_IOCTL_DATA_OUT
+		pkt.sptd.Cdb[0] = 0x2A // WRITE(10)
+	} else {
+		pkt.sptd.DataIn = 1 // SCSI_IOCTL_DATA_IN
+		pkt.sptd.Cdb[0] = 0x28 // READ(10)
+	}
+	pkt.sptd.DataTransferLength = uint32(len(dataBuf))
+	pkt.sptd.TimeOutValue = 10
+	pkt.sptd.DataBuffer = uintptr(unsafe.Pointer(&dataBuf[0]))
+	pkt.sptd.SenseInfoOffset = uint32(unsafe.Offsetof(pkt.SenseBuf))
+	binary.BigEndian.PutUint32(pkt.sptd.Cdb[2:6], lba)
+	binary.BigEndian.PutUint16(pkt.sptd.Cdb[7:9], blocks)
+
+	var returned uint32
+	r1, _, _ := procDeviceIoControl.Call(
+		uintptr(h),
+		uintptr(ioctlScsiPassThroughDir),
+		uintptr(unsafe.Pointer(&pkt)),
+		uintptr(unsafe.Sizeof(pkt)),
+		uintptr(unsafe.Pointer(&pkt)),
+		uintptr(unsafe.Sizeof(pkt)),
+		uintptr(unsafe.Pointer(&returned)),
+		0,
+	)
+	return r1 != 0 && pkt.sptd.ScsiStatus == 0
+}
+
+// ExecuteLiveHardwareClamp repartitions physical LBA 0 (MBR) via direct SCSI WRITE(10) pass-through
+// to clamp Partition #1 to safeBytes, updates OS partition properties, and formats the clamped volume as exFAT.
+func ExecuteLiveHardwareClamp(drv model.DriveInfo, safeBytes uint64, label string) error {
+	if drv.IsSystemBoot {
+		return fmt.Errorf("refusing to clamp system boot drive %s", drv.DevicePath)
+	}
+	rawPath := drv.RawVolumePath
+	if rawPath == "" {
+		rawPath = `\\.\` + strings.TrimSuffix(drv.DevicePath, `\`)
+	}
+	pathPtr, err := syscall.UTF16PtrFromString(rawPath)
+	if err != nil {
+		return err
+	}
+	r1, _, e1 := procCreateFileW.Call(
+		uintptr(unsafe.Pointer(pathPtr)),
+		uintptr(genericRead|genericWrite),
+		uintptr(fileShareRead|fileShareWrite),
+		0,
+		uintptr(openExisting),
+		0,
+		0,
+	)
+	h := syscall.Handle(r1)
+	if h == syscall.InvalidHandle {
+		return fmt.Errorf("failed opening %s for SCSI MBR clamp: %v", rawPath, e1)
+	}
+
+	safeSectors := uint32(safeBytes / 512)
+	mbr := make([]byte, 512)
+	_ = sendSCSIRW10(h, false, 0, 1, mbr)
+
+	// Clear 64-byte partition table at 446..509
+	for i := 446; i < 510; i++ {
+		mbr[i] = 0
+	}
+	// Disk signature
+	mbr[440], mbr[441], mbr[442], mbr[443] = 0x46, 0x54, 0x33, 0x32
+	// Partition #1 entry at 446 (StartLBA = 32, Type = 0x07 exFAT, Length = safeSectors)
+	mbr[446+0] = 0x80
+	mbr[446+1], mbr[446+2], mbr[446+3] = 0x01, 0x01, 0x00
+	mbr[446+4] = 0x07
+	mbr[446+5], mbr[446+6], mbr[446+7] = 0xFE, 0xFF, 0xFF
+	binary.LittleEndian.PutUint32(mbr[446+8:446+12], 32)
+	binary.LittleEndian.PutUint32(mbr[446+12:446+16], safeSectors)
+	mbr[510], mbr[511] = 0x55, 0xAA
+
+	if !sendSCSIRW10(h, true, 0, 1, mbr) {
+		syscall.CloseHandle(h)
+		return fmt.Errorf("SCSI WRITE(10) to LBA 0 failed on %s", rawPath)
+	}
+
+	var bytesRet uint32
+	procDeviceIoControl.Call(uintptr(h), uintptr(ioctlDiskUpdateProperties), 0, 0, 0, 0, uintptr(unsafe.Pointer(&bytesRet)), 0)
+	procDeviceIoControl.Call(uintptr(h), uintptr(fsctlDismountVolume), 0, 0, 0, 0, uintptr(unsafe.Pointer(&bytesRet)), 0)
+	syscall.CloseHandle(h)
+
+	dl := strings.TrimSuffix(strings.TrimPrefix(drv.DevicePath, `\\.\`), `:`)
+	if label == "" {
+		label = "FLASH_SAFE"
+	}
+	psFmt := fmt.Sprintf("Start-Sleep -Milliseconds 800; Format-Volume -DriveLetter '%s' -FileSystem exFAT -NewFileSystemLabel '%s' -Confirm:$false | Out-Null", dl, label)
+	cmd := exec.Command("powershell", "-NoProfile", "-Command", psFmt)
+	return cmd.Run()
+}

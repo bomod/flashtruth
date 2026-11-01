@@ -22,6 +22,7 @@ func main() {
 	speedMBFlag := flag.Int("speed-mb", 8, "Unbuffered hardware DMA benchmark size in MB")
 	jsonOutFlag := flag.String("json", "", "Save full forensic audit report to JSON file")
 	htmlOutFlag := flag.String("html", "", "Save standalone Forensic Dispute Certificate to HTML file")
+	repairFlag := flag.Bool("repair", false, "Automatically clamp counterfeit drive MBR partition to verified safe physical NAND capacity via SCSI WRITE(10)")
 	guiFlag := flag.Bool("gui", false, "Launch interactive Web/Desktop Dashboard GUI")
 	portFlag := flag.Int("port", 8787, "Port for interactive GUI server")
 	noBrowserFlag := flag.Bool("no-browser", false, "Do not auto-open browser when starting --gui")
@@ -74,6 +75,16 @@ func main() {
 				fmt.Fprintf(os.Stderr, "[!] Failed saving HTML: %v\n", err)
 			} else {
 				fmt.Printf("[+] Saved HTML Dispute Certificate -> %s\n", *htmlOutFlag)
+			}
+		}
+		if *repairFlag && rep.RepairPlan.Needed {
+			fmt.Printf("[*] Executing Live Hardware SCSI MBR Clamp on %s to %.2f GiB (%d MB)...\n",
+				rep.Drive.DevicePath, rep.RepairPlan.RecommendedSafeGiB, rep.RepairPlan.RecommendedSafeMB)
+			if err := hal.ExecuteLiveHardwareClamp(rep.Drive, rep.RepairPlan.RecommendedSafeBytes, "FLASH_SAFE"); err != nil {
+				fmt.Fprintf(os.Stderr, "[!] Hardware clamp failed: %v\n", err)
+			} else {
+				fmt.Printf("[+] Drive %s successfully clamped and formatted to true physical capacity (%.2f GiB)!\n",
+					rep.Drive.DevicePath, rep.RepairPlan.RecommendedSafeGiB)
 			}
 		}
 	}
