@@ -330,7 +330,7 @@ foreach ($v in $vols) {
     $isSysBoot = if ($disk -and ($disk.IsBoot -or $disk.IsSystem)) { $true } else { $dl -eq 'C' }
     $wmiVol = Get-CimInstance Win32_LogicalDisk -Filter "DeviceID='${dl}:'" -ErrorAction SilentlyContinue
     $secSize = if ($disk -and $disk.LogicalSectorSize) { [uint32]$disk.LogicalSectorSize } else { 512 }
-    $totSize = if ($disk -and $disk.Size) { [uint64]$disk.Size } else { [uint64]$v.Size }
+    $totSize = if ($part -and $part.Size -gt 0) { [uint64]$part.Size } elseif ($v.Size -gt 0) { [uint64]$v.Size } elseif ($disk -and $disk.Size) { [uint64]$disk.Size } else { 0 }
     $partOff = if ($part) { [uint64]$part.Offset } else { 0 }
     $busType = if ($pd -and $pd.BusType) { [string]$pd.BusType } elseif ($disk) { [string]$disk.BusType } else { "USB" }
     $mediaType = if ($pd -and $pd.MediaType -and $pd.MediaType -ne 'Unspecified') { [string]$pd.MediaType } elseif ($isUsbOrRem) { "Removable Flash" } else { "SSD" }
@@ -454,7 +454,7 @@ if ($part) {
 }
 
 $secSize = if ($disk -and $disk.LogicalSectorSize) { [uint32]$disk.LogicalSectorSize } else { 512 }
-$totSize = if ($disk -and $disk.Size) { [uint64]$disk.Size } else { [uint64]$v.Size }
+$totSize = if ($part -and $part.Size -gt 0) { [uint64]$part.Size } elseif ($v.Size -gt 0) { [uint64]$v.Size } elseif ($disk -and $disk.Size) { [uint64]$disk.Size } else { 0 }
 $partOff = if ($part) { [uint64]$part.Offset } else { 0 }
 $isUsbOrRem = ($v.DriveType -eq 'Removable') -or ($disk -and $disk.BusType -eq 'USB')
 $isSysBoot = if ($disk -and ($disk.IsBoot -or $disk.IsSystem)) { $true } else { $dl -eq 'C' }
@@ -604,12 +604,12 @@ func ExecuteLiveHardwareClamp(drv model.DriveInfo, safeBytes uint64, label strin
 	}
 	// Disk signature
 	mbr[440], mbr[441], mbr[442], mbr[443] = 0x46, 0x54, 0x33, 0x32
-	// Partition #1 entry at 446 (StartLBA = 32, Type = 0x07 exFAT, Length = safeSectors)
+	// Partition #1 entry at 446 (StartLBA = 2048 standard 1MiB alignment, Type = 0x07 exFAT, Length = safeSectors)
 	mbr[446+0] = 0x80
-	mbr[446+1], mbr[446+2], mbr[446+3] = 0x01, 0x01, 0x00
+	mbr[446+1], mbr[446+2], mbr[446+3] = 0x20, 0x21, 0x00
 	mbr[446+4] = 0x07
 	mbr[446+5], mbr[446+6], mbr[446+7] = 0xFE, 0xFF, 0xFF
-	binary.LittleEndian.PutUint32(mbr[446+8:446+12], 32)
+	binary.LittleEndian.PutUint32(mbr[446+8:446+12], 2048)
 	binary.LittleEndian.PutUint32(mbr[446+12:446+16], safeSectors)
 	mbr[510], mbr[511] = 0x55, 0xAA
 

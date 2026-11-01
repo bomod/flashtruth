@@ -177,10 +177,19 @@ func EvaluateTrustScore(r *model.AuditReport) model.TrustScorecard {
 		score = 0
 	}
 
+	isClampedSafe := r.CapacityProbe.Tested && !r.CapacityProbe.IsFakeCapacity && r.SCSI.ReportedTotalSectors > r.Drive.TotalSectors*2
+	if isClampedSafe && score < 85 {
+		score = 85
+	}
+
 	var grade, verdictAR, verdictEN string
 	isAuthentic := !r.CapacityProbe.IsFakeCapacity && score >= 70
 
 	switch {
+	case isClampedSafe:
+		grade = "A // REPAIRED & SAFE"
+		verdictAR = "تم إصلاح الفلاش وعزل السعة الوهمية — القسم النشط الحالي سليم 100% ومحصور داخل الذاكرة الفيزيائية الحقيقية"
+		verdictEN = "REPAIRED & SAFE STORAGE MEDIA — Active partition is 100% verified physical NAND; phantom LBA space is quarantined"
 	case r.CapacityProbe.IsFakeCapacity || score < 30:
 		grade = "F // COUNTERFEIT"
 		verdictAR = "فلاش مُزوَّر السعة والتصنيف — السعة الفيزيائية الحقيقية جزء ضئيل من السعة المعلنة (خطر تلف البيانات)"

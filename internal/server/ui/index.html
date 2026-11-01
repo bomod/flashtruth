@@ -1685,8 +1685,9 @@ async function executeLiveClamp() {
     const data = await res.json();
     if (data.ok) {
       st.style.color = 'var(--signal-emerald)';
-      st.textContent = `REPAIRED: ${data.drive} clamped to ${data.safe_gib} GiB (${data.safe_mb} MB) [FLASH_32GB]`;
-      loadDrives();
+      st.textContent = `REPAIRED: ${data.drive} clamped to ${data.safe_gib} GiB (${data.safe_mb} MB) [FLASH_32GB] — Re-verifying...`;
+      await loadDrives();
+      startScan();
     } else {
       st.style.color = 'var(--signal-crimson)';
       st.textContent = `ERROR: ${data.error}`;
