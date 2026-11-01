@@ -467,4 +467,6 @@ func ResolveStorageOrigin(d *model.DriveInfo, usb model.USBTopology, sig model.C
 			d.IEEEOUI = "N/A (Standard Serial)"
 		}
 	}
+	rec := ClassifyHDDRecordingTech(d.HardwareModel, d.SpindleSpeed, d.MediaType)
+	d.RecordingTech = rec.RecordingTech
 }

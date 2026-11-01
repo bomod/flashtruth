@@ -15,9 +15,12 @@ type AuditReport struct {
 	BootForensics   BootSectorForensics  `json:"boot_forensics"`
 	SecurityScan    MalwareScanResult    `json:"security_scan"`
 	SpeedMetrics    SpeedBenchmark       `json:"speed_metrics"`
-	CapacityProbe   CapacityVerifyResult `json:"capacity_probe"`
-	RepairPlan      SafeRepairPlan       `json:"repair_plan"`
-	Trust           TrustScorecard       `json:"trust"`
+	CapacityProbe        CapacityVerifyResult `json:"capacity_probe"`
+	RepairPlan           SafeRepairPlan       `json:"repair_plan"`
+	Trust                TrustScorecard       `json:"trust"`
+	AttestationHash      string               `json:"attestation_hash,omitempty"`
+	AttestationPublicKey string               `json:"attestation_public_key,omitempty"`
+	AttestationSignature string               `json:"attestation_signature,omitempty"`
 }
 
 // DriveInfo holds OS-level logical and physical disk metadata.
@@ -52,6 +55,7 @@ type DriveInfo struct {
 	OEMManufacturer    string  `json:"oem_manufacturer"`     // Resolved true OEM / Fab manufacturer
 	ControllerVendor   string  `json:"controller_vendor"`    // Resolved controller or bridge chip developer
 	IEEEOUI            string  `json:"ieee_oui"`             // Resolved IEEE OUI from EUI-64/WWN serial
+	RecordingTech      string  `json:"recording_tech"`       // SOLID_STATE, CMR, or SMR
 }
 
 // USBTopology holds physical USB bus descriptors and negotiated speed.

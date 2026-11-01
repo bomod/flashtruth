@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/flashtruth/flashtruth/internal/attest"
 	"github.com/flashtruth/flashtruth/internal/db"
 	"github.com/flashtruth/flashtruth/internal/forensics"
 	"github.com/flashtruth/flashtruth/internal/hal"
@@ -93,6 +94,11 @@ func RunFullAudit(targetDrive string, speedTestMB int, onProgress func(string, i
 	rawBytes, _ := json.Marshal(rep.CapacityProbe)
 	sum := sha256.Sum256(rawBytes)
 	rep.ReportID = "FT-" + strings.ToUpper(hex.EncodeToString(sum[:6]))
+
+	att := attest.SignAuditReport(rep, []byte(rep.ReportID))
+	rep.AttestationHash = att.CanonicalHash
+	rep.AttestationPublicKey = att.PublicKeyHex
+	rep.AttestationSignature = att.SignatureHex
 
 	notify("Audit Complete", 100)
 	return rep, nil

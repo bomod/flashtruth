@@ -10,6 +10,9 @@ import (
 	"runtime"
 	"strings"
 
+	"github.com/flashtruth/flashtruth/internal/attest"
+	"github.com/flashtruth/flashtruth/internal/db"
+	"github.com/flashtruth/flashtruth/internal/forensics"
 	"github.com/flashtruth/flashtruth/internal/hal"
 	"github.com/flashtruth/flashtruth/internal/model"
 	"github.com/flashtruth/flashtruth/internal/report"
@@ -17,18 +20,70 @@ import (
 )
 
 func main() {
-	listFlag := flag.Bool("list", false, "List connected removable/USB storage drives")
+	listFlag := flag.Bool("list", false, "List connected storage volumes (USB, NVMe, SATA, HDD, SD)")
 	driveFlag := flag.String("drive", "", "Target drive to audit (e.g. D: on Windows, /dev/sdb on Linux, /dev/disk2 on macOS)")
 	speedMBFlag := flag.Int("speed-mb", 8, "Unbuffered hardware DMA benchmark size in MB")
 	jsonOutFlag := flag.String("json", "", "Save full forensic audit report to JSON file")
 	htmlOutFlag := flag.String("html", "", "Save standalone Forensic Dispute Certificate to HTML file")
 	repairFlag := flag.Bool("repair", false, "Automatically clamp counterfeit drive MBR partition to verified safe physical NAND capacity via SCSI WRITE(10)")
+	decodeNANDFlag := flag.String("decode-nand", "", "Decode raw 6-to-8 byte ONFI/Toggle NAND Flash Read-ID (0x90) hex string")
+	decodeCIDFlag := flag.String("decode-cid", "", "Decode raw 128-bit (32-hex) SD/microSD Card Identification (CID) register & verify CRC7")
+	verifyReportFlag := flag.String("verify-report", "", "Verify Ed25519-SHA256 cryptographic signature of a saved JSON audit report")
 	guiFlag := flag.Bool("gui", false, "Launch interactive Web/Desktop Dashboard GUI")
 	portFlag := flag.Int("port", 8787, "Port for interactive GUI server")
 	noBrowserFlag := flag.Bool("no-browser", false, "Do not auto-open browser when starting --gui")
 	flag.Parse()
 
 	printBanner()
+
+	if *decodeNANDFlag != "" {
+		info := db.DecodeNANDFlashID(*decodeNANDFlag)
+		fmt.Printf("NAND Read-ID (0x90) : %s\n", info.RawIDHex)
+		fmt.Printf("  Silicon Foundry   : %s\n", info.FoundryName)
+		fmt.Printf("  Cell Architecture : %s\n", info.CellType)
+		fmt.Printf("  Generation / Die  : %s\n", info.Generation)
+		fmt.Printf("  Authentic Maker   : %v\n", info.IsAuthentic)
+		return
+	}
+
+	if *decodeCIDFlag != "" {
+		cid := forensics.DecodeSDCID(*decodeCIDFlag)
+		fmt.Printf("SD/MMC 128-bit CID  : %s (Valid: %v)\n", cid.RawCIDHex, cid.Valid)
+		fmt.Printf("  Manufacturer (MID): 0x%02X — %s\n", cid.ManufacturerID, cid.ManufacturerName)
+		fmt.Printf("  OEM ID (OID)      : '%s'\n", cid.OEMApplicationID)
+		fmt.Printf("  Product Name (PNM): '%s' (Rev %s)\n", cid.ProductName, cid.ProductRevision)
+		fmt.Printf("  Serial (PSN)      : 0x%08X (%d)\n", cid.ProductSerial, cid.ProductSerial)
+		fmt.Printf("  Manufacture Date  : %s\n", cid.ManufactureDate)
+		fmt.Printf("  Hardware CRC7     : 0x%02X (Expected: 0x%02X, Valid: %v)\n", cid.CRC7Actual, cid.CRC7Expected, cid.CRC7Valid)
+		return
+	}
+
+	if *verifyReportFlag != "" {
+		raw, err := os.ReadFile(*verifyReportFlag)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "[!] Cannot read report file: %v\n", err)
+			os.Exit(1)
+		}
+		var rep model.AuditReport
+		if err := json.Unmarshal(raw, &rep); err != nil {
+			fmt.Fprintf(os.Stderr, "[!] Invalid JSON report: %v\n", err)
+			os.Exit(1)
+		}
+		ok := attest.VerifyAuditSignature(&rep, attest.AttestationBlock{
+			Algorithm:     "Ed25519-SHA256",
+			CanonicalHash: rep.AttestationHash,
+			PublicKeyHex:  rep.AttestationPublicKey,
+			SignatureHex:  rep.AttestationSignature,
+		})
+		fmt.Printf("Report ID           : %s\n", rep.ReportID)
+		fmt.Printf("Canonical SHA-256   : %s\n", rep.AttestationHash)
+		fmt.Printf("Ed25519 Public Key  : %s\n", rep.AttestationPublicKey)
+		fmt.Printf("Signature Verified  : %v\n", ok)
+		if !ok {
+			os.Exit(2)
+		}
+		return
+	}
 
 	if *listFlag {
 		drives, err := hal.ListDrives()
