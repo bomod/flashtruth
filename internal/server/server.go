@@ -133,5 +133,30 @@ func (s *Server) Handler() http.Handler {
 		_ = enc.Encode(rep)
 	})
 
+	mux.HandleFunc("/api/repair", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+			return
+		}
+		s.mu.RLock()
+		rep := s.lastReport
+		s.mu.RUnlock()
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		if rep == nil || !rep.RepairPlan.Needed {
+			_ = json.NewEncoder(w).Encode(map[string]any{"ok": false, "error": "No counterfeit drive repair plan active"})
+			return
+		}
+		if err := hal.ExecuteLiveHardwareClamp(rep.Drive, rep.RepairPlan.RecommendedSafeBytes, "FLASH_32GB"); err != nil {
+			_ = json.NewEncoder(w).Encode(map[string]any{"ok": false, "error": err.Error()})
+			return
+		}
+		_ = json.NewEncoder(w).Encode(map[string]any{
+			"ok":       true,
+			"safe_gib": rep.RepairPlan.RecommendedSafeGiB,
+			"safe_mb":  rep.RepairPlan.RecommendedSafeMB,
+			"drive":    rep.Drive.DevicePath,
+		})
+	})
+
 	return mux
 }

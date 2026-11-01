@@ -1674,6 +1674,31 @@ function copyText(id, btn) {
   setTimeout(() => btn.textContent = dict.btn_copy, 1400);
 }
 
+async function executeLiveClamp() {
+  const btn = document.getElementById('liveClampBtn');
+  const st = document.getElementById('liveClampStatus');
+  if (!btn || !st) return;
+  btn.disabled = true;
+  st.textContent = 'WRITING LBA 0 MBR VIA SCSI WRITE(10) & FORMATTING EXFAT...';
+  try {
+    const res = await fetch('/api/repair', { method: 'POST' });
+    const data = await res.json();
+    if (data.ok) {
+      st.style.color = 'var(--signal-emerald)';
+      st.textContent = `REPAIRED: ${data.drive} clamped to ${data.safe_gib} GiB (${data.safe_mb} MB) [FLASH_32GB]`;
+      loadDrives();
+    } else {
+      st.style.color = 'var(--signal-crimson)';
+      st.textContent = `ERROR: ${data.error}`;
+      btn.disabled = false;
+    }
+  } catch (e) {
+    st.style.color = 'var(--signal-crimson)';
+    st.textContent = `ERROR: ${e.message}`;
+    btn.disabled = false;
+  }
+}
+
 function renderReport(r) {
   const dict = I18N[currentLang];
   document.getElementById('reportWorkspace').style.display = 'block';
@@ -1798,6 +1823,12 @@ function renderReport(r) {
           r.repair_plan.recommended_safe_mb,
           r.repair_plan.quarantined_fake_gib
         )}
+      </div>
+      <div style="margin-bottom:16px;display:flex;align-items:center;gap:12px;">
+        <button class="btn-primary" id="liveClampBtn" onclick="executeLiveClamp()" style="background:var(--signal-emerald);">
+          EXECUTE LIVE HARDWARE MBR CLAMP (${r.repair_plan.recommended_safe_gib} GiB)
+        </button>
+        <span id="liveClampStatus" class="mono" style="font-size:12px;color:var(--text-secondary);"></span>
       </div>
       <div class="nav-section-label" style="padding:0;">WINDOWS POWERSHELL (ADMINISTRATOR)</div>
       <div class="cmd-block"><span id="cmdPs">${r.repair_plan.windows_powershell_cmd}</span><button class="copy-btn" onclick="copyText('cmdPs', this)">${dict.btn_copy}</button></div>
