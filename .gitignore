@@ -1,0 +1,15 @@
+# Compiled binaries and release artifacts (published via GitHub Releases)
+dist/
+*.exe
+*.out
+*.test
+
+# Local forensic audit exports
+*_Forensic_Certificate.html
+*_Forensic_Audit.json
+
+# OS / IDE metadata
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

@@ -1,0 +1,1818 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" data-theme="obsidian">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FLASHTRUTH // Hardware Forensics &amp; NAND Capacity Verification Workbench</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root[data-theme="obsidian"] {
+    --bg-root: #09090b;
+    --bg-surface: #101013;
+    --bg-elevated: #16161a;
+    --bg-hover: #1c1c22;
+    --bg-code: #060608;
+    --border-hairline: #222228;
+    --border-strong: #32323c;
+    --text-primary: #fafafa;
+    --text-secondary: #a1a1aa;
+    --text-muted: #63636e;
+    --accent-primary: #fafafa;
+    --accent-primary-fg: #09090b;
+    --signal-emerald: #10b981;
+    --signal-emerald-bg: rgba(16, 185, 129, 0.10);
+    --signal-crimson: #f43f5e;
+    --signal-crimson-bg: rgba(244, 63, 94, 0.11);
+    --signal-amber: #f59e0b;
+    --signal-amber-bg: rgba(245, 158, 11, 0.11);
+    --signal-violet: #8b5cf6;
+    --signal-violet-bg: rgba(139, 92, 246, 0.14);
+  }
+
+  :root[data-theme="paper"] {
+    --bg-root: #f4f4f5;
+    --bg-surface: #ffffff;
+    --bg-elevated: #fafafa;
+    --bg-hover: #f0f0f3;
+    --bg-code: #f8f8fa;
+    --border-hairline: #e4e4e7;
+    --border-strong: #d4d4d8;
+    --text-primary: #09090b;
+    --text-secondary: #52525b;
+    --text-muted: #71717a;
+    --accent-primary: #09090b;
+    --accent-primary-fg: #ffffff;
+    --signal-emerald: #059669;
+    --signal-emerald-bg: rgba(5, 150, 105, 0.08);
+    --signal-crimson: #e11d48;
+    --signal-crimson-bg: rgba(225, 29, 72, 0.08);
+    --signal-amber: #d97706;
+    --signal-amber-bg: rgba(217, 119, 6, 0.08);
+    --signal-violet: #7c3aed;
+    --signal-violet-bg: rgba(124, 58, 237, 0.08);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    height: 100%;
+    background: var(--bg-root);
+    color: var(--text-primary);
+    font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 13px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  html[dir="rtl"] body {
+    font-family: 'IBM Plex Sans Arabic', 'Plus Jakarta Sans', sans-serif;
+  }
+  .mono {
+    font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .workbench {
+    display: grid;
+    grid-template-rows: 52px 1fr 28px;
+    min-height: 100vh;
+  }
+
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    background: var(--bg-surface);
+    border-bottom: 1px solid var(--border-hairline);
+    gap: 16px;
+  }
+  .brand-cluster {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .brand-mark {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--text-primary);
+    color: var(--bg-root);
+    border-radius: 4px;
+  }
+  .brand-title {
+    font-weight: 800;
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .brand-version {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    padding: 2px 6px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-hairline);
+    color: var(--text-secondary);
+    border-radius: 3px;
+  }
+  .status-indicator {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text-secondary);
+    padding: 3px 10px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-hairline);
+    border-radius: 3px;
+  }
+  .status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--signal-emerald);
+  }
+  .status-dot.busy {
+    background: var(--signal-amber);
+    box-shadow: 0 0 8px var(--signal-amber);
+  }
+
+  .toolbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .ctrl-group {
+    display: flex;
+    align-items: center;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-hairline);
+    border-radius: 5px;
+    height: 32px;
+    overflow: hidden;
+  }
+  .ctrl-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+    padding: 0 10px;
+    border-inline-end: 1px solid var(--border-hairline);
+    white-space: nowrap;
+  }
+  select.ctrl-select {
+    background: transparent;
+    color: var(--text-primary);
+    border: none;
+    padding: 0 10px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    height: 100%;
+    outline: none;
+    cursor: pointer;
+  }
+  select.ctrl-select option {
+    background: var(--bg-surface);
+    color: var(--text-primary);
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    height: 32px;
+    padding: 0 12px;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-primary);
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-hairline);
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.12s ease, border-color 0.12s ease;
+    white-space: nowrap;
+  }
+  .btn:hover:not(:disabled) {
+    background: var(--bg-hover);
+    border-color: var(--border-strong);
+  }
+  .btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+  .btn-primary {
+    background: var(--accent-primary);
+    color: var(--accent-primary-fg);
+    border-color: var(--accent-primary);
+    font-weight: 700;
+  }
+  .btn-primary:hover:not(:disabled) {
+    opacity: 0.9;
+    background: var(--accent-primary);
+  }
+  .btn svg {
+    width: 14px;
+    height: 14px;
+    stroke-width: 1.75;
+    flex-shrink: 0;
+  }
+
+  .main-area {
+    display: grid;
+    grid-template-columns: 228px 1fr;
+    overflow: hidden;
+  }
+
+  .nav-rail {
+    background: var(--bg-surface);
+    border-inline-end: 1px solid var(--border-hairline);
+    padding: 16px 12px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  .nav-section-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding: 0 10px;
+    margin-bottom: 8px;
+  }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 9px 10px;
+    border-radius: 5px;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--text-secondary);
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    text-align: start;
+    cursor: pointer;
+    margin-bottom: 3px;
+    transition: all 0.12s ease;
+  }
+  .nav-item:hover {
+    color: var(--text-primary);
+    background: var(--bg-elevated);
+  }
+  .nav-item.active {
+    color: var(--text-primary);
+    background: var(--bg-elevated);
+    border-color: var(--border-hairline);
+  }
+  .nav-item svg {
+    width: 15px;
+    height: 15px;
+    stroke-width: 1.6;
+    flex-shrink: 0;
+  }
+  .nav-idx {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--text-muted);
+    margin-inline-start: auto;
+  }
+
+  .rail-telemetry-box {
+    border-top: 1px solid var(--border-hairline);
+    padding-top: 14px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text-secondary);
+  }
+  .rail-kv {
+    display: flex;
+    justify-content: space-between;
+    padding: 3px 6px;
+  }
+  .rail-kv span:first-child { color: var(--text-muted); }
+
+  .viewport {
+    padding: 20px 24px 40px;
+    overflow-y: auto;
+    max-height: calc(100vh - 80px);
+  }
+
+  .progress-strip {
+    display: none;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-strong);
+    border-radius: 6px;
+    padding: 14px 18px;
+    margin-bottom: 20px;
+  }
+  .progress-header {
+    display: flex;
+    justify-content: space-between;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    margin-bottom: 8px;
+  }
+  .progress-track {
+    width: 100%;
+    height: 4px;
+    background: var(--bg-elevated);
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    width: 0%;
+    background: var(--text-primary);
+    transition: width 0.2s ease;
+  }
+
+  .verdict-panel {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 24px;
+    padding: 20px 24px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-hairline);
+    border-inline-start: 3px solid var(--signal-emerald);
+    margin-bottom: 18px;
+  }
+  .verdict-panel.counterfeit {
+    border-inline-start-color: var(--signal-crimson);
+    background: linear-gradient(90deg, var(--signal-crimson-bg) 0%, var(--bg-surface) 45%);
+  }
+  .verdict-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .verdict-headline {
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    margin-bottom: 4px;
+  }
+  .verdict-sub {
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+  .score-readout {
+    text-align: end;
+    padding-inline-start: 24px;
+    border-inline-start: 1px solid var(--border-hairline);
+  }
+  .score-number {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 34px;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.04em;
+  }
+  .score-grade-pill {
+    display: inline-block;
+    margin-top: 6px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 3px;
+    border: 1px solid currentColor;
+  }
+
+  .telemetry-matrix {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    background: var(--border-hairline);
+    gap: 1px;
+    border: 1px solid var(--border-hairline);
+    margin-bottom: 18px;
+  }
+  .t-cell {
+    background: var(--bg-surface);
+    padding: 16px 18px;
+  }
+  .t-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+  }
+  .t-val {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    direction: ltr;
+    text-align: start;
+  }
+  .t-meta {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text-secondary);
+    margin-top: 6px;
+    direction: ltr;
+    text-align: start;
+  }
+
+  .spectrum-box {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-hairline);
+    padding: 16px 20px;
+    margin-bottom: 18px;
+  }
+  .spectrum-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .spectrum-bar {
+    height: 18px;
+    width: 100%;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-hairline);
+    display: flex;
+    overflow: hidden;
+    direction: ltr;
+  }
+  .spec-true {
+    background: var(--signal-emerald);
+    height: 100%;
+    min-width: 4px;
+    transition: width 0.4s ease;
+  }
+  .spec-fake {
+    background: repeating-linear-gradient(
+      -45deg,
+      rgba(244, 63, 94, 0.25),
+      rgba(244, 63, 94, 0.25) 6px,
+      rgba(244, 63, 94, 0.45) 6px,
+      rgba(244, 63, 94, 0.45) 12px
+    );
+    height: 100%;
+    transition: width 0.4s ease;
+  }
+  .spectrum-legend {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text-secondary);
+  }
+
+  .panel {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-hairline);
+    margin-bottom: 18px;
+  }
+  .panel-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 18px;
+    border-bottom: 1px solid var(--border-hairline);
+    background: var(--bg-elevated);
+  }
+  .panel-title {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .panel-title svg {
+    width: 14px;
+    height: 14px;
+    color: var(--text-secondary);
+  }
+  .panel-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--text-muted);
+  }
+  .panel-body {
+    padding: 18px;
+  }
+
+  .wafer-layout {
+    display: grid;
+    grid-template-columns: 1fr 310px;
+    gap: 18px;
+  }
+  .wafer-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(76px, 1fr));
+    gap: 4px;
+    direction: ltr;
+  }
+  .wafer-cell {
+    padding: 7px 6px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-hairline);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    cursor: crosshair;
+    transition: transform 0.08s ease, border-color 0.08s ease;
+  }
+  .wafer-cell:hover {
+    transform: translateY(-1px);
+    border-color: var(--text-primary);
+  }
+  .wafer-cell.st-VALID {
+    background: var(--signal-emerald-bg);
+    border-color: rgba(16, 185, 129, 0.4);
+    color: var(--signal-emerald);
+  }
+  .wafer-cell.st-FAKE_VOID_FF, .wafer-cell.st-FAKE_VOID_00, .wafer-cell.st-CORRUPTED {
+    background: var(--signal-crimson-bg);
+    border-color: rgba(244, 63, 94, 0.4);
+    color: var(--signal-crimson);
+  }
+  .wafer-cell.st-WRAP_AROUND {
+    background: var(--signal-violet-bg);
+    border-color: var(--signal-violet);
+    color: var(--signal-violet);
+  }
+  .wafer-hud {
+    background: var(--bg-code);
+    border: 1px solid var(--border-hairline);
+    padding: 14px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+  }
+  .hud-title {
+    font-size: 10px;
+    color: var(--text-muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--border-hairline);
+    padding-bottom: 6px;
+    margin-bottom: 10px;
+  }
+  .hud-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 4px 0;
+    border-bottom: 1px dashed rgba(128,128,128,0.15);
+  }
+  .hud-row span:first-child { color: var(--text-muted); }
+  .hud-row span:last-child { direction: ltr; }
+
+  table.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+  }
+  table.data-table th, table.data-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border-hairline);
+    text-align: start;
+    vertical-align: top;
+  }
+  table.data-table th {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--text-muted);
+    background: var(--bg-elevated);
+  }
+  table.data-table tr:hover td {
+    background: var(--bg-hover);
+  }
+
+  .status-pill {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 3px;
+    white-space: nowrap;
+    direction: ltr;
+  }
+  .pill-PASS { background: var(--signal-emerald-bg); color: var(--signal-emerald); border: 1px solid rgba(16,185,129,0.35); }
+  .pill-FAIL { background: var(--signal-crimson-bg); color: var(--signal-crimson); border: 1px solid rgba(244,63,94,0.35); }
+  .pill-WARN { background: var(--signal-amber-bg); color: var(--signal-amber); border: 1px solid rgba(245,158,11,0.35); }
+
+  .hex-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+  .hex-dump-box {
+    background: var(--bg-code);
+    border: 1px solid var(--border-hairline);
+    padding: 12px 14px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    line-height: 1.65;
+    direction: ltr;
+    text-align: left;
+    overflow-x: auto;
+  }
+  .hex-line {
+    display: flex;
+    gap: 14px;
+    white-space: pre;
+  }
+  .hex-off { color: var(--text-muted); }
+  .hex-bytes { color: var(--text-primary); }
+  .hex-ascii { color: var(--signal-emerald); }
+
+  .cmd-block {
+    position: relative;
+    background: var(--bg-code);
+    border: 1px solid var(--border-hairline);
+    padding: 12px 14px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text-primary);
+    direction: ltr;
+    text-align: left;
+    margin-top: 6px;
+    margin-bottom: 14px;
+    overflow-x: auto;
+  }
+  .copy-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    padding: 3px 8px;
+    background: var(--bg-elevated);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-hairline);
+    border-radius: 3px;
+    cursor: pointer;
+  }
+  .copy-btn:hover { color: var(--text-primary); border-color: var(--border-strong); }
+
+  .statusbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    background: var(--bg-surface);
+    border-top: 1px solid var(--border-hairline);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--text-muted);
+  }
+
+  @media (max-width: 1024px) {
+    .main-area { grid-template-columns: 1fr; }
+    .nav-rail { display: none; }
+    .telemetry-matrix { grid-template-columns: repeat(2, 1fr); }
+    .wafer-layout, .hex-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="workbench">
+  <!-- TOP COMMAND BAR -->
+  <header class="topbar">
+    <div class="brand-cluster">
+      <div class="brand-mark">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+        </svg>
+      </div>
+      <span class="brand-title">FLASHTRUTH</span>
+      <span class="brand-version">v1.0 // LAB</span>
+      <div class="status-indicator">
+        <span class="status-dot" id="statusDot"></span>
+        <span id="statusText" data-i18n="status_ready">READY // DIRECT DMA</span>
+      </div>
+    </div>
+
+    <div class="toolbar-actions">
+      <div class="ctrl-group">
+        <span class="ctrl-label" data-i18n="lbl_target">TARGET</span>
+        <select class="ctrl-select" id="driveSelect"></select>
+      </div>
+
+      <div class="ctrl-group">
+        <span class="ctrl-label" data-i18n="lbl_dma">DMA WINDOW</span>
+        <select class="ctrl-select" id="speedSelect">
+          <option value="4">4 MB</option>
+          <option value="8" selected>8 MB</option>
+          <option value="16">16 MB</option>
+          <option value="32">32 MB</option>
+        </select>
+      </div>
+
+      <button class="btn btn-primary" id="scanBtn" onclick="startScan()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <polygon points="5 3 19 12 5 21 5 3"></polygon>
+        </svg>
+        <span data-i18n="btn_execute">EXECUTE HARDWARE AUDIT</span>
+      </button>
+
+      <button class="btn" onclick="loadDrives()" title="Refresh">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <path d="M21 2v6h-6M3 12a9 9 0 0 1 15-6.7L21 8M3 22v-6h6M21 12a9 9 0 0 1-15 6.7L3 16"/>
+        </svg>
+      </button>
+
+      <button class="btn" onclick="exportCertificate()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+        </svg>
+        <span data-i18n="btn_cert">CERTIFICATE</span>
+      </button>
+
+      <button class="btn" onclick="window.open('/api/export-json','_blank')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <polyline points="16 18 22 12 16 6"></polyline>
+          <polyline points="8 6 2 12 8 18"></polyline>
+        </svg>
+        <span>JSON</span>
+      </button>
+
+      <div class="ctrl-group">
+        <span class="ctrl-label" data-i18n="lbl_lang">LANG</span>
+        <select class="ctrl-select" id="langSelect" onchange="setLanguage(this.value)">
+          <option value="en" selected>EN</option>
+          <option value="ar">AR</option>
+          <option value="fr">FR</option>
+          <option value="es">ES</option>
+          <option value="de">DE</option>
+          <option value="zh">ZH</option>
+        </select>
+      </div>
+
+      <button class="btn" onclick="toggleTheme()" id="themeBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <circle cx="12" cy="12" r="5"></circle>
+          <line x1="12" y1="1" x2="12" y2="3"></line>
+          <line x1="12" y1="21" x2="12" y2="23"></line>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+          <line x1="1" y1="12" x2="3" y2="12"></line>
+          <line x1="21" y1="12" x2="23" y2="12"></line>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- MAIN WORKBENCH BODY -->
+  <div class="main-area">
+    <!-- LEFT NAVIGATION RAIL -->
+    <aside class="nav-rail">
+      <div>
+        <div class="nav-section-label" data-i18n="nav_modules">DIAGNOSTIC MODULES</div>
+        <button class="nav-item active" onclick="filterSection('all', this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          <span data-i18n="nav_all">Unified Workbench</span>
+          <span class="nav-idx">00</span>
+        </button>
+        <button class="nav-item" onclick="filterSection('sec-wafer', this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          <span data-i18n="nav_wafer">LBA Wafer &amp; Binary Search</span>
+          <span class="nav-idx">01</span>
+        </button>
+        <button class="nav-item" onclick="filterSection('sec-evidence', this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          <span data-i18n="nav_evidence">Forensic Telemetry</span>
+          <span class="nav-idx">02</span>
+        </button>
+        <button class="nav-item" onclick="filterSection('sec-hex', this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+          <span data-i18n="nav_hex">SCSI &amp; MBR Hex Dump</span>
+          <span class="nav-idx">03</span>
+        </button>
+        <button class="nav-item" onclick="filterSection('sec-repair', this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+          <span data-i18n="nav_repair">Safe Capacity Lock</span>
+          <span class="nav-idx">04</span>
+        </button>
+      </div>
+
+      <div class="rail-telemetry-box">
+        <div class="nav-section-label" style="padding:0;margin-bottom:6px;" data-i18n="nav_bus_state">ACTIVE BUS STATE</div>
+        <div class="rail-kv"><span data-i18n="rail_id">REPORT ID</span><span id="railReportId">--</span></div>
+        <div class="rail-kv"><span>VID : PID</span><span id="railVidPid">--</span></div>
+        <div class="rail-kv"><span>USB REV</span><span id="railUsbRev">--</span></div>
+        <div class="rail-kv"><span data-i18n="rail_lba">START LBA</span><span id="railStartLba">--</span></div>
+        <div class="rail-kv"><span data-i18n="rail_time">PROBE TIME</span><span id="railProbeTime">--</span></div>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT VIEWPORT -->
+    <main class="viewport">
+      <!-- LIVE PROGRESS BAR -->
+      <div class="progress-strip" id="progressStrip">
+        <div class="progress-header">
+          <span id="progressStage">INITIALIZING DIRECT HARDWARE ACCESS...</span>
+          <span id="progressPercent">0%</span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill" id="progressFill"></div>
+        </div>
+      </div>
+
+      <div id="reportWorkspace" style="display:none;">
+        <!-- VERDICT HEADER PANEL -->
+        <div class="verdict-panel" id="verdictPanel">
+          <div>
+            <div class="verdict-tag" id="verdictTag"></div>
+            <div class="verdict-headline" id="verdictHeadline"></div>
+            <div class="verdict-sub" id="verdictSecondary"></div>
+          </div>
+          <div class="score-readout">
+            <div class="score-number" id="scoreNumber">0/100</div>
+            <span class="score-grade-pill" id="scoreGrade"></span>
+          </div>
+        </div>
+
+        <!-- 4-COLUMN TELEMETRY MATRIX -->
+        <div class="telemetry-matrix">
+          <div class="t-cell">
+            <div class="t-label"><span data-i18n="kpi_reported">OS REPORTED CAPACITY</span><span>LBA</span></div>
+            <div class="t-val" id="valReported">--</div>
+            <div class="t-meta" id="metaReported">--</div>
+          </div>
+          <div class="t-cell">
+            <div class="t-label"><span data-i18n="kpi_true">VERIFIED PHYSICAL NAND</span><span>NAND</span></div>
+            <div class="t-val" id="valTrue">--</div>
+            <div class="t-meta" id="metaTrue">--</div>
+          </div>
+          <div class="t-cell">
+            <div class="t-label"><span data-i18n="kpi_phantom">SPOOFED PHANTOM SPACE</span><span>VOID</span></div>
+            <div class="t-val" id="valFakePct">--</div>
+            <div class="t-meta" id="metaFakeMode">--</div>
+          </div>
+          <div class="t-cell">
+            <div class="t-label"><span data-i18n="kpi_dma">DIRECT DMA THROUGHPUT</span><span>DMA</span></div>
+            <div class="t-val" id="valSpeed">--</div>
+            <div class="t-meta" id="metaSpeed">--</div>
+          </div>
+        </div>
+
+        <!-- PROPORTIONAL CAPACITY SPECTRUM -->
+        <div class="spectrum-box">
+          <div class="spectrum-header">
+            <span data-i18n="spec_title">PHYSICAL NAND vs. UNMAPPED PHANTOM ADDRESS SPACE</span>
+            <span class="mono" id="specBoundaryLabel" style="font-size:11px;color:var(--text-secondary);"></span>
+          </div>
+          <div class="spectrum-bar">
+            <div class="spec-true" id="specTrueBar" style="width:50%;"></div>
+            <div class="spec-fake" id="specFakeBar" style="width:50%;"></div>
+          </div>
+          <div class="spectrum-legend">
+            <span id="specLegendTrue"></span>
+            <span id="specLegendFake"></span>
+          </div>
+        </div>
+
+        <!-- MODULE 01: LBA WAFER MATRIX & O(log N) BINARY SEARCH -->
+        <section class="panel" id="sec-wafer">
+          <div class="panel-head">
+            <div class="panel-title">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg>
+              <span data-i18n="sec_wafer_title">01 // PHYSICAL LBA WAFER TOPOLOGY &amp; O(log N) BINARY SEARCH CONVERGENCE</span>
+            </div>
+            <span class="panel-tag" data-i18n="tag_dma_probes">4096-BYTE ALIGNED DMA PROBES</span>
+          </div>
+          <div class="panel-body">
+            <div class="wafer-layout">
+              <div>
+                <div class="wafer-grid" id="waferGrid"></div>
+              </div>
+              <div class="wafer-hud">
+                <div class="hud-title" data-i18n="hud_title">SECTOR INSPECTOR HUD (HOVER BLOCK)</div>
+                <div class="hud-row"><span data-i18n="hud_offset">OFFSET (GiB)</span><span id="hudGiB">--</span></div>
+                <div class="hud-row"><span data-i18n="hud_lba">PHYSICAL LBA</span><span id="hudLba">--</span></div>
+                <div class="hud-row"><span data-i18n="hud_byte">BYTE ADDRESS</span><span id="hudByte">--</span></div>
+                <div class="hud-row"><span data-i18n="hud_status">STATUS</span><span id="hudStatus">--</span></div>
+                <div class="hud-row"><span data-i18n="hud_written">WRITTEN TAG</span><span id="hudWritten">--</span></div>
+                <div class="hud-row"><span data-i18n="hud_read">READBACK HEX</span><span id="hudRead">--</span></div>
+                <div class="hud-row"><span data-i18n="hud_canary">K=0 CANARY</span><span id="hudCanary">--</span></div>
+                <div class="hud-row"><span data-i18n="hud_lat">I/O LATENCY</span><span id="hudLat">--</span></div>
+              </div>
+            </div>
+
+            <div style="margin-top:20px;">
+              <div class="nav-section-label" style="padding:0;margin-bottom:8px;" data-i18n="bsearch_subtitle">STEP-BY-STEP O(log N) BINARY SEARCH BOUNDARY TRACE</div>
+              <div style="max-height:250px;overflow-y:auto;border:1px solid var(--border-hairline);">
+                <table class="data-table mono">
+                  <thead>
+                    <tr>
+                      <th data-i18n="th_step">STEP</th>
+                      <th data-i18n="th_window">SEARCH WINDOW (LOW .. HIGH 4K PAGE)</th>
+                      <th data-i18n="th_mid">MIDPOINT PAGE</th>
+                      <th data-i18n="th_loc">PHYSICAL OFFSET / LBA</th>
+                      <th data-i18n="th_state">STATE</th>
+                      <th data-i18n="th_readback">HARDWARE READBACK</th>
+                    </tr>
+                  </thead>
+                  <tbody id="bsearchBody"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- MODULE 02: FORENSIC TELEMETRY & CONTROLLER DATABASE -->
+        <section class="panel" id="sec-evidence">
+          <div class="panel-head">
+            <div class="panel-title">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              <span data-i18n="sec_evidence_title">02 // MULTI-FACTOR FORENSIC EVIDENCE &amp; CONTROLLER VERIFICATION</span>
+            </div>
+            <span class="panel-tag" data-i18n="tag_ground_truth">GROUND-TRUTH AUDIT</span>
+          </div>
+          <div class="panel-body" style="padding:0;">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th style="width:110px;" data-i18n="th_verdict">VERDICT</th>
+                  <th style="width:240px;" data-i18n="th_vector">VECTOR</th>
+                  <th data-i18n="th_determination">TECHNICAL DETERMINATION</th>
+                  <th style="width:290px;" data-i18n="th_proof">RAW HARDWARE PROOF</th>
+                </tr>
+              </thead>
+              <tbody id="evidenceBody"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- MODULE 03: CONTROLLER, SCSI CDB & MBR/VBR HEX INSPECTOR -->
+        <section class="panel" id="sec-hex">
+          <div class="panel-head">
+            <div class="panel-title">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+              <span data-i18n="sec_hex_title">03 // CONTROLLER SILICON X-RAY, RAW SCSI CDB &amp; MBR/EXFAT HEX INSPECTOR</span>
+            </div>
+            <span class="panel-tag" data-i18n="tag_low_level">LOW-LEVEL BUS &amp; SECTOR DUMP</span>
+          </div>
+          <div class="panel-body">
+            <div class="hex-grid">
+              <div>
+                <div class="nav-section-label" style="padding:0;margin-bottom:6px;" data-i18n="hex_scsi_lbl">SCSI INQUIRY (CDB 0x12 — 36 BYTES)</div>
+                <div class="hex-dump-box" id="hexScsiInquiry"></div>
+                <div class="nav-section-label" style="padding:0;margin:14px 0 6px;" data-i18n="hex_mbr_lbl">MBR PARTITION ENTRY #1 (OFFSET 0x1BE — 16 BYTES)</div>
+                <div class="hex-dump-box" id="hexMbrPart"></div>
+              </div>
+              <div>
+                <div class="nav-section-label" style="padding:0;margin-bottom:6px;" data-i18n="hex_desc_lbl">CONTROLLER &amp; USB BUS DESCRIPTORS</div>
+                <div class="hex-dump-box" id="controllerSpecBox"></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- MODULE 04: SAFE CAPACITY LOCK & REMEDIATION -->
+        <section class="panel" id="sec-repair">
+          <div class="panel-head">
+            <div class="panel-title">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              <span data-i18n="sec_repair_title">04 // SAFE CAPACITY LOCK &amp; PHANTOM LBA QUARANTINE</span>
+            </div>
+            <span class="panel-tag" data-i18n="tag_safety_margin">3% SAFETY MARGIN BELOW LBA BOUNDARY</span>
+          </div>
+          <div class="panel-body" id="repairBody"></div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <!-- BOTTOM STATUSBAR -->
+  <footer class="statusbar">
+    <div data-i18n="footer_left">FLASHTRUTH ENGINE // ZERO-HALLUCINATION HARDWARE AUDITOR</div>
+    <div data-i18n="footer_right">IOCTL: DIRECT_DMA | ALIGNMENT: 4096B | NON-DESTRUCTIVE ROLLBACK: ENABLED</div>
+  </footer>
+</div>
+
+<script>
+const I18N = {
+  en: {
+    dir: "ltr",
+    status_ready: "READY // DIRECT DMA",
+    status_probing: "LOCKED // PROBING DMA",
+    lbl_target: "TARGET",
+    lbl_dma: "DMA WINDOW",
+    lbl_lang: "LANG",
+    btn_execute: "EXECUTE HARDWARE AUDIT",
+    btn_cert: "CERTIFICATE",
+    btn_copy: "COPY",
+    btn_copied: "COPIED",
+    nav_modules: "DIAGNOSTIC MODULES",
+    nav_all: "Unified Workbench",
+    nav_wafer: "LBA Wafer & Binary Search",
+    nav_evidence: "Forensic Telemetry",
+    nav_hex: "SCSI & MBR Hex Dump",
+    nav_repair: "Safe Capacity Lock",
+    nav_bus_state: "ACTIVE BUS STATE",
+    rail_id: "REPORT ID",
+    rail_lba: "START LBA",
+    rail_time: "PROBE TIME",
+    kpi_reported: "OS REPORTED CAPACITY",
+    kpi_true: "VERIFIED PHYSICAL NAND",
+    kpi_phantom: "SPOOFED PHANTOM SPACE",
+    kpi_dma: "DIRECT DMA THROUGHPUT",
+    spec_title: "PHYSICAL NAND vs. UNMAPPED PHANTOM ADDRESS SPACE",
+    spec_boundary: "EXACT BOUNDARY",
+    spec_true_lbl: "VERIFIED NAND",
+    spec_fake_lbl: "PHANTOM VOID",
+    sec_wafer_title: "01 // PHYSICAL LBA WAFER TOPOLOGY & O(log N) BINARY SEARCH CONVERGENCE",
+    tag_dma_probes: "4096-BYTE ALIGNED DMA PROBES",
+    hud_title: "SECTOR INSPECTOR HUD (HOVER BLOCK)",
+    hud_offset: "OFFSET (GiB)",
+    hud_lba: "PHYSICAL LBA",
+    hud_byte: "BYTE ADDRESS",
+    hud_status: "STATUS",
+    hud_written: "WRITTEN TAG",
+    hud_read: "READBACK HEX",
+    hud_canary: "K=0 CANARY",
+    hud_lat: "I/O LATENCY",
+    canary_ok: "INTACT (NO OVERWRITE)",
+    canary_bad: "CORRUPTED (WRAP-AROUND)",
+    bsearch_subtitle: "STEP-BY-STEP O(log N) BINARY SEARCH BOUNDARY TRACE",
+    th_step: "STEP",
+    th_window: "SEARCH WINDOW (LOW .. HIGH 4K PAGE)",
+    th_mid: "MIDPOINT PAGE",
+    th_loc: "PHYSICAL OFFSET / LBA",
+    th_state: "STATE",
+    th_readback: "HARDWARE READBACK",
+    sec_evidence_title: "02 // MULTI-FACTOR FORENSIC EVIDENCE & CONTROLLER VERIFICATION",
+    tag_ground_truth: "GROUND-TRUTH AUDIT",
+    th_verdict: "VERDICT",
+    th_vector: "VECTOR",
+    th_determination: "TECHNICAL DETERMINATION",
+    th_proof: "RAW HARDWARE PROOF",
+    sec_hex_title: "03 // CONTROLLER SILICON X-RAY, RAW SCSI CDB & MBR/EXFAT HEX INSPECTOR",
+    tag_low_level: "LOW-LEVEL BUS & SECTOR DUMP",
+    hex_scsi_lbl: "SCSI INQUIRY (CDB 0x12 — 36 BYTES)",
+    hex_mbr_lbl: "MBR PARTITION ENTRY #1 (OFFSET 0x1BE — 16 BYTES)",
+    hex_desc_lbl: "CONTROLLER & USB BUS DESCRIPTORS",
+    sec_repair_title: "04 // SAFE CAPACITY LOCK & PHANTOM LBA QUARANTINE",
+    tag_safety_margin: "3% SAFETY MARGIN BELOW LBA BOUNDARY",
+    footer_left: "FLASHTRUTH ENGINE // ZERO-HALLUCINATION HARDWARE AUDITOR",
+    footer_right: "IOCTL: DIRECT_DMA | ALIGNMENT: 4096B | NON-DESTRUCTIVE ROLLBACK: ENABLED",
+    verdict_fake_main: "COUNTERFEIT STORAGE MEDIA — Physical NAND capacity is a fraction of advertised LBA count (High Data Loss Risk)",
+    verdict_fake_sub: "Hardware binary search confirmed unmapped phantom LBA space beyond the physical flash boundary.",
+    verdict_ok_main: "AUTHENTIC STORAGE MEDIA — Physical NAND capacity, bus speed, and controller verified",
+    verdict_ok_sub: "All hardware probe points across the entire reported LBA range passed direct unbuffered verification.",
+    repair_desc: (trueGiB, sectors, safeGiB, safeMB, fakeGiB) =>
+      `True physical NAND ends at <strong>${trueGiB} GiB</strong> (Sector ${sectors}). To prevent silent file corruption or LBA wrap-around, clamp the active partition to <strong>${safeGiB} GiB (${safeMB} MB)</strong> and quarantine the remaining <strong>${fakeGiB} GiB</strong> as unallocated space:`,
+    repair_none: "NO REMEDIATION REQUIRED — PHYSICAL NAND CAPACITY MATCHES REPORTED VOLUME SIZE."
+  },
+  ar: {
+    dir: "rtl",
+    status_ready: "جاهز // وصول مباشر للعتاد",
+    status_probing: "مقفل // فحص عتادي مباشر",
+    lbl_target: "القرص",
+    lbl_dma: "حجم الاختبار",
+    lbl_lang: "اللغة",
+    btn_execute: "بدء الفحص العتادي الشامل",
+    btn_cert: "شهادة الفحص",
+    btn_copy: "نسخ",
+    btn_copied: "تم النسخ",
+    nav_modules: "وحدات التشخيص العتادي",
+    nav_all: "منصة الفحص الموحدة",
+    nav_wafer: "خريطة القطاعات والبحث الثنائي",
+    nav_evidence: "الأدلة الجنائية والعتادية",
+    nav_hex: "البيانات السداسية العشرية الخام",
+    nav_repair: "عزل السعة الوهمية والإصلاح",
+    nav_bus_state: "حالة الناقل النشط",
+    rail_id: "معرف التقرير",
+    rail_lba: "بداية القسم",
+    rail_time: "زمن الفحص",
+    kpi_reported: "السعة المعلنة للنظام",
+    kpi_true: "سعة الـ NAND الفيزيائية الحقيقية",
+    kpi_phantom: "نسبة السعة الوهمية المزيفة",
+    kpi_dma: "سرعة العتاد المباشرة بدون كاش",
+    spec_title: "المقارنة النسبية بين الذاكرة الفيزيائية الحقيقية والمساحة الوهمية غير المربوطة",
+    spec_boundary: "الحد الفيزيائي الفاصل",
+    spec_true_lbl: "ذاكرة حقيقية موثقة",
+    spec_fake_lbl: "سعة وهمية تالفة",
+    sec_wafer_title: "01 // خريطة قطاعات الذاكرة وخطوات البحث الثنائي",
+    tag_dma_probes: "فحص عتادي مباشر بمحاذات 4096 بايت",
+    hud_title: "كاشف تفاصيل القطاع (مرر المؤشر على أي مربع)",
+    hud_offset: "الإزاحة (GiB)",
+    hud_lba: "رقم القطاع الفيزيائي",
+    hud_byte: "عنوان البايت",
+    hud_status: "الحالة",
+    hud_written: "البصمة المكتوبة",
+    hud_read: "القراءة المرتدة",
+    hud_canary: "سلامة قطاع البداية",
+    hud_lat: "زمن الاستجابة",
+    canary_ok: "سليم (لا يوجد التفاف)",
+    canary_bad: "تالف (تم رصد التفاف العناوين)",
+    bsearch_subtitle: "سجل خطوات البحث الثنائي لتحديد آخر قطاع فيزيائي صالح",
+    th_step: "الخطوة",
+    th_window: "نطاق البحث (من .. إلى صفحة 4K)",
+    th_mid: "صفحة المنتصف المختبرة",
+    th_loc: "الموقع الفيزيائي / القطاع",
+    th_state: "النتيجة",
+    th_readback: "البيانات المقروءة من العتاد",
+    sec_evidence_title: "02 // الأدلة الجنائية وتقييم موثوقية المتحكم",
+    tag_ground_truth: "تدقيق عتادي موثق",
+    th_verdict: "الحكم",
+    th_vector: "محور الفحص",
+    th_determination: "التحليل الفني",
+    th_proof: "الدليل العتادي الخام",
+    sec_hex_title: "03 // تشريح المتحكم والبيانات السداسية العشرية الخام",
+    tag_low_level: "تفريغ أوامر الناقل والقطاعات",
+    hex_scsi_lbl: "استعلام SCSI الخام (الأمر 0x12 — 36 بايت)",
+    hex_mbr_lbl: "مدخل القسم الأول في قطاع الإقلاع MBR (الإزاحة 0x1BE — 16 بايت)",
+    hex_desc_lbl: "واصفات المتحكم وناقل الـ USB",
+    sec_repair_title: "04 // خطة الإصلاح الآمن وعزل القطاعات الوهمية",
+    tag_safety_margin: "هامش أمان 3% تحت الحد الفيزيائي",
+    footer_left: "محرك فلاش تروث // فحص عتادي خالٍ من التخمين",
+    footer_right: "الوصول: مباشر بدون كاش | المحاذاة: 4096 بايت | استرجاع البيانات الأصلية: مفعّل",
+    verdict_fake_main: "قرص تخزين مُزوَّر السعة والتصنيف — السعة الفيزيائية الحقيقية جزء ضئيل من السعة المعلنة (خطر تلف البيانات)",
+    verdict_fake_sub: "أثبت البحث الثنائي العتادي وجود مساحة عناوين وهمية غير مربوطة بشرائح ذاكرة حقيقية.",
+    verdict_ok_main: "قرص تخزين أصلي وموثوق — السعة الفيزيائية، سرعة الناقل، وهوية المتحكم مطابقة للمعايير",
+    verdict_ok_sub: "اجتازت جميع نقاط الفحص العتادي المباشر عبر كامل مساحة القرص اختبار الكتابة والقراءة بنجاح.",
+    repair_desc: (trueGiB, sectors, safeGiB, safeMB, fakeGiB) =>
+      `تنتهي شريحة الذاكرة الفيزيائية الحقيقية عند <strong>${trueGiB} GiB</strong> (القطاع ${sectors}). لمنع تلف الملفات أو التفاف العناوين، قم بحصر القسم الفعال في <strong>${safeGiB} GiB (${safeMB} MB)</strong> وعزل المساحة الوهمية المتبقية (<strong>${fakeGiB} GiB</strong>) كمساحة غير مخصصة:`,
+    repair_none: "لا يتطلب القرص أي إصلاح — السعة الفيزيائية الحقيقية مطابقة تماماً للسعة المعلنة."
+  },
+  fr: {
+    dir: "ltr",
+    status_ready: "PRÊT // ACCÈS DIRECT DMA",
+    status_probing: "VERROUILLÉ // SONDE DMA",
+    lbl_target: "CIBLE",
+    lbl_dma: "FENÊTRE DMA",
+    lbl_lang: "LANGUE",
+    btn_execute: "EXÉCUTER L'AUDIT MATÉRIEL",
+    btn_cert: "CERTIFICAT",
+    btn_copy: "COPIER",
+    btn_copied: "COPIÉ",
+    nav_modules: "MODULES DE DIAGNOSTIC",
+    nav_all: "Atelier Unifié",
+    nav_wafer: "Carte LBA & Recherche Binaire",
+    nav_evidence: "Télémétrie Forensique",
+    nav_hex: "Inspection Hex SCSI & MBR",
+    nav_repair: "Verrouillage Capacité Sûre",
+    nav_bus_state: "ÉTAT DU BUS ACTIF",
+    rail_id: "ID RAPPORT",
+    rail_lba: "LBA DÉBUT",
+    rail_time: "DURÉE SONDE",
+    kpi_reported: "CAPACITÉ ANNONCÉE",
+    kpi_true: "CAPACITÉ NAND RÉELLE",
+    kpi_phantom: "ESPACE FANTÔME FALSIFIÉ",
+    kpi_dma: "DÉBIT MATÉRIEL DIRECT",
+    spec_title: "CAPACITÉ NAND PHYSIQUE vs ESPACE FANTÔME NON MAPPÉ",
+    spec_boundary: "LIMITE EXACTE",
+    spec_true_lbl: "NAND VÉRIFIÉE",
+    spec_fake_lbl: "VIDE FANTÔME",
+    sec_wafer_title: "01 // TOPOLOGIE LBA & CONVERGENCE DE RECHERCHE BINAIRE O(log N)",
+    tag_dma_probes: "SONDES DMA ALIGNÉES SUR 4096 OCTETS",
+    hud_title: "INSPECTEUR DE SECTEUR (SURVOLER)",
+    hud_offset: "DÉCALAGE (GiB)",
+    hud_lba: "LBA PHYSIQUE",
+    hud_byte: "ADRESSE OCTET",
+    hud_status: "STATUT",
+    hud_written: "MOTIF ÉCRIT",
+    hud_read: "LECTURE HEX",
+    hud_canary: "CANARI K=0",
+    hud_lat: "LATENCE E/S",
+    canary_ok: "INTACT (SANS ÉCRASEMENT)",
+    canary_bad: "CORROMPU (BOUCLAGE LBA)",
+    bsearch_subtitle: "TRACE DE RECHERCHE BINAIRE PAS À PAS O(log N)",
+    th_step: "ÉTAPE",
+    th_window: "FENÊTRE (PAGE 4K BASSE .. HAUTE)",
+    th_mid: "PAGE MÉDIANE",
+    th_loc: "DÉCALAGE PHYSIQUE / LBA",
+    th_state: "ÉTAT",
+    th_readback: "LECTURE MATÉRIELLE",
+    sec_evidence_title: "02 // PREUVES FORENSIQUES & VÉRIFICATION DU CONTRÔLEUR",
+    tag_ground_truth: "AUDIT MATÉRIEL VÉRIFIÉ",
+    th_verdict: "VERDICT",
+    th_vector: "VECTEUR",
+    th_determination: "DÉTERMINATION TECHNIQUE",
+    th_proof: "PREUVE MATÉRIELLE BRUTE",
+    sec_hex_title: "03 // RAYON-X DU CONTRÔLEUR, CDB SCSI & SECTEUR D'AMORÇAGE",
+    tag_low_level: "VIDAGE HEXADÉCIMAL BAS NIVEAU",
+    hex_scsi_lbl: "SCSI INQUIRY (CDB 0x12 — 36 OCTETS)",
+    hex_mbr_lbl: "ENTRÉE DE PARTITION MBR #1 (0x1BE — 16 OCTETS)",
+    hex_desc_lbl: "DESCRIPTEURS DU CONTRÔLEUR ET DU BUS USB",
+    sec_repair_title: "04 // VERROUILLAGE DE CAPACITÉ SÛRE & MISE EN QUARANTAINE",
+    tag_safety_margin: "MARGE DE SÉCURITÉ DE 3% SOUS LA LIMITE LBA",
+    footer_left: "MOTEUR FLASHTRUTH // AUDITEUR MATÉRIEL SANS HALLUCINATION",
+    footer_right: "IOCTL : DIRECT_DMA | ALIGNEMENT : 4096O | RESTAURATION NON DESTRUCTIVE : ACTIVÉE",
+    verdict_fake_main: "SUPPORT CONTREFAIT — La capacité physique NAND ne représente qu'une fraction de la capacité annoncée",
+    verdict_fake_sub: "La recherche binaire matérielle a confirmé un espace LBA fantôme non mappé au-delà de la limite physique.",
+    verdict_ok_main: "SUPPORT AUTHENTIQUE — Capacité physique NAND, vitesse du bus et contrôleur vérifiés",
+    verdict_ok_sub: "Tous les points de sonde matériels sur l'ensemble de l'espace LBA ont réussi la vérification directe.",
+    repair_desc: (trueGiB, sectors, safeGiB, safeMB, fakeGiB) =>
+      `La mémoire NAND physique réelle se termine à <strong>${trueGiB} GiB</strong> (Secteur ${sectors}). Pour éviter toute corruption de fichiers, limitez la partition active à <strong>${safeGiB} GiB (${safeMB} Mo)</strong> et isolez les <strong>${fakeGiB} GiB</strong> restants en espace non alloué :`,
+    repair_none: "AUCUNE RÉPARATION REQUISE — LA CAPACITÉ PHYSIQUE CORRESPOND AU VOLUME ANNONCÉ."
+  },
+  es: {
+    dir: "ltr",
+    status_ready: "LISTO // DMA DIRECTO",
+    status_probing: "BLOQUEADO // SONDEO DMA",
+    lbl_target: "UNIDAD",
+    lbl_dma: "VENTANA DMA",
+    lbl_lang: "IDIOMA",
+    btn_execute: "EJECUTAR AUDITORÍA DE HARDWARE",
+    btn_cert: "CERTIFICADO",
+    btn_copy: "COPIAR",
+    btn_copied: "COPIADO",
+    nav_modules: "MÓDULOS DE DIAGNÓSTICO",
+    nav_all: "Panel Unificado",
+    nav_wafer: "Mapa LBA y Búsqueda Binaria",
+    nav_evidence: "Telemetría Forense",
+    nav_hex: "Inspector Hex SCSI y MBR",
+    nav_repair: "Bloqueo de Capacidad Segura",
+    nav_bus_state: "ESTADO DEL BUS",
+    rail_id: "ID INFORME",
+    rail_lba: "LBA INICIAL",
+    rail_time: "TIEMPO SONDEO",
+    kpi_reported: "CAPACIDAD REPORTADA",
+    kpi_true: "CAPACIDAD NAND REAL",
+    kpi_phantom: "ESPACIO FANTASMA FALSO",
+    kpi_dma: "VELOCIDAD DMA REAL",
+    spec_title: "MEMORIA NAND FÍSICA vs. ESPACIO FANTASMA FALSIFICADO",
+    spec_boundary: "LÍMITE EXACTO",
+    spec_true_lbl: "NAND VERIFICADA",
+    spec_fake_lbl: "VACÍO FANTASMA",
+    sec_wafer_title: "01 // TOPOLOGÍA LBA Y BÚSQUEDA BINARIA O(log N)",
+    tag_dma_probes: "SONDEOS DMA ALINEADOS A 4096 BYTES",
+    hud_title: "INSPECTOR DE SECTOR (PASAR EL CURSOR)",
+    hud_offset: "DESPLAZAMIENTO (GiB)",
+    hud_lba: "LBA FÍSICO",
+    hud_byte: "DIRECCIÓN BYTE",
+    hud_status: "ESTADO",
+    hud_written: "FIRMA ESCRITA",
+    hud_read: "LECTURA HEX",
+    hud_canary: "CANARIO K=0",
+    hud_lat: "LATENCIA E/S",
+    canary_ok: "INTACTO (SIN SOBRESCRITURA)",
+    canary_bad: "CORRUPTO (DESBORDAMIENTO LBA)",
+    bsearch_subtitle: "TRAZA DE CONVERGENCIA DE BÚSQUEDA BINARIA O(log N)",
+    th_step: "PASO",
+    th_window: "VENTANA (PÁGINA 4K BAJA .. ALTA)",
+    th_mid: "PÁGINA MEDIA",
+    th_loc: "UBICACIÓN FÍSICA / LBA",
+    th_state: "ESTADO",
+    th_readback: "LECTURA DE HARDWARE",
+    sec_evidence_title: "02 // EVIDENCIA FORENSE Y VERIFICACIÓN DE CONTROLADOR",
+    tag_ground_truth: "AUDITORÍA DE HARDWARE",
+    th_verdict: "VEREDICTO",
+    th_vector: "VECTOR",
+    th_determination: "DETERMINACIÓN TÉCNICA",
+    th_proof: "PRUEBA DE HARDWARE BRUTA",
+    sec_hex_title: "03 // RAYOS-X DEL CONTROLADOR Y VOLCADO HEX SCSI/MBR",
+    tag_low_level: "VOLCADO DE SECTORES Y BUS",
+    hex_scsi_lbl: "SCSI INQUIRY (CDB 0x12 — 36 BYTES)",
+    hex_mbr_lbl: "ENTRADA DE PARTICIÓN MBR #1 (0x1BE — 16 BYTES)",
+    hex_desc_lbl: "DESCRIPTORES DEL CONTROLADOR Y BUS USB",
+    sec_repair_title: "04 // AISLAMIENTO DE CAPACIDAD SEGURA (REPARACIÓN)",
+    tag_safety_margin: "MARGEN DE SEGURIDAD DEL 3% BAJO EL LÍMITE LBA",
+    footer_left: "MOTOR FLASHTRUTH // AUDITOR DE HARDWARE SIN ALUCINACIONES",
+    footer_right: "IOCTL: DIRECT_DMA | ALINEACIÓN: 4096B | REVERSIÓN NO DESTRUCTIVA: ACTIVA",
+    verdict_fake_main: "MEDIO DE ALMACENAMIENTO FALSIFICADO — La capacidad física NAND es una fracción de lo anunciado",
+    verdict_fake_sub: "La búsqueda binaria por hardware confirmó espacio LBA fantasma sin asignar más allá del límite físico.",
+    verdict_ok_main: "MEDIO AUTÉNTICO — Capacidad física NAND, velocidad de bus y controlador verificados",
+    verdict_ok_sub: "Todos los puntos de prueba de hardware en todo el rango LBA superaron la verificación directa.",
+    repair_desc: (trueGiB, sectors, safeGiB, safeMB, fakeGiB) =>
+      `La memoria NAND física real termina en <strong>${trueGiB} GiB</strong> (Sector ${sectors}). Para evitar la pérdida de datos, limite la partición activa a <strong>${safeGiB} GiB (${safeMB} MB)</strong> y aísle los <strong>${fakeGiB} GiB</strong> restantes como espacio no asignado:`,
+    repair_none: "NO SE REQUIERE REPARACIÓN — LA CAPACIDAD FÍSICA COINCIDE CON EL TAMAÑO REPORTADO."
+  },
+  de: {
+    dir: "ltr",
+    status_ready: "BEREIT // DIREKT-DMA",
+    status_probing: "GESPERRT // DMA-PRÜFUNG",
+    lbl_target: "ZIEL",
+    lbl_dma: "DMA-GRÖSSE",
+    lbl_lang: "SPRACHE",
+    btn_execute: "HARDWARE-AUDIT STARTEN",
+    btn_cert: "ZERTIFIKAT",
+    btn_copy: "KOPIEREN",
+    btn_copied: "KOPIERT",
+    nav_modules: "DIAGNOSEMODULE",
+    nav_all: "Gesamtansicht",
+    nav_wafer: "LBA-Wafer & Binärsuche",
+    nav_evidence: "Forensische Telemetrie",
+    nav_hex: "SCSI & MBR Hex-Inspektor",
+    nav_repair: "Kapazitätssperre",
+    nav_bus_state: "AKTIVER BUS-STATUS",
+    rail_id: "BERICHT-ID",
+    rail_lba: "START-LBA",
+    rail_time: "PRÜFDAUER",
+    kpi_reported: "ANGEZEIGTE KAPAZITÄT",
+    kpi_true: "ECHTE PHYSISCHE NAND-GRÖSSE",
+    kpi_phantom: "GEFÄLSCHTER PHANTOMSPEICHER",
+    kpi_dma: "ECHTER DMA-DURCHSATZ",
+    spec_title: "PHYSISCHER NAND-SPEICHER vs. PHANTOM-ADRESSRAUM",
+    spec_boundary: "EXAKTE GRENZE",
+    spec_true_lbl: "VERIFIZIERTER NAND",
+    spec_fake_lbl: "PHANTOM-LEERRAUM",
+    sec_wafer_title: "01 // LBA-TOPOLOGIE & O(log N) BINÄRSUCHE",
+    tag_dma_probes: "4096-BYTE-AUSGERICHTETE DMA-SONDEN",
+    hud_title: "SEKTOR-INSPEKTOR (BLOCK ÜBERFAHREN)",
+    hud_offset: "OFFSET (GiB)",
+    hud_lba: "PHYSISCHER LBA",
+    hud_byte: "BYTE-ADRESSE",
+    hud_status: "STATUS",
+    hud_written: "GESCHRIEBENES TAG",
+    hud_read: "GELESENES HEX",
+    hud_canary: "K=0 KANARIENVOGEL",
+    hud_lat: "E/A-LATENZ",
+    canary_ok: "INTAKT (KEIN ÜBERSCHREIBEN)",
+    canary_bad: "BESCHÄDIGT (LBA-ÜBERLAUF)",
+    bsearch_subtitle: "SCHRITTWEISE O(log N) BINÄRSUCHE DER SEKTORGRENZE",
+    th_step: "SCHRITT",
+    th_window: "SUCHFENSTER (4K-SEITE MIN .. MAX)",
+    th_mid: "MITTELPUNKT-SEITE",
+    th_loc: "PHYSISCHER OFFSET / LBA",
+    th_state: "STATUS",
+    th_readback: "HARDWARE-RÜCKLESUNG",
+    sec_evidence_title: "02 // FORENSISCHE BEWEISE & CONTROLLER-ANALYSE",
+    tag_ground_truth: "HARDWARE-BODENWAHRHEIT",
+    th_verdict: "URTEIL",
+    th_vector: "PRÜFVEKTOR",
+    th_determination: "TECHNISCHE FESTSTELLUNG",
+    th_proof: "ROHER HARDWARE-NACHWEIS",
+    sec_hex_title: "03 // CONTROLLER-RÖNTGEN & SCSI/MBR HEX-DUMP",
+    tag_low_level: "LOW-LEVEL-SEKTOR-DUMP",
+    hex_scsi_lbl: "SCSI INQUIRY (CDB 0x12 — 36 BYTES)",
+    hex_mbr_lbl: "MBR-PARTITIONSEINTRAG #1 (0x1BE — 16 BYTES)",
+    hex_desc_lbl: "CONTROLLER- & USB-BUS-DESKRIPTOREN",
+    sec_repair_title: "04 // SICHERE PARTITIONSGRENZE & QUARANTÄNE",
+    tag_safety_margin: "3% SICHERHEITSMARGE UNTERHALB DER LBA-GRENZE",
+    footer_left: "FLASHTRUTH ENGINE // HARDWARE-AUDITOR OHNE HALLUZINATIONEN",
+    footer_right: "IOCTL: DIRECT_DMA | AUSRICHTUNG: 4096B | ZERSTÖRUNGSFREIES ROLLBACK: AKTIV",
+    verdict_fake_main: "GEFÄLSCHTES SPEICHERMEDIUM — Physische NAND-Kapazität ist nur ein Bruchteil der Angabe",
+    verdict_fake_sub: "Die Hardware-Binärsuche hat nicht zugeordneten Phantom-LBA-Speicher jenseits der Flash-Grenze bestätigt.",
+    verdict_ok_main: "AUTHENTISCHES SPEICHERMEDIUM — Physische NAND-Kapazität, Busgeschwindigkeit und Controller bestätigt",
+    verdict_ok_sub: "Alle Hardware-Messpunkte über den gesamten LBA-Bereich haben die ungepufferte Direktprüfung bestanden.",
+    repair_desc: (trueGiB, sectors, safeGiB, safeMB, fakeGiB) =>
+      `Der echte physische NAND-Speicher endet bei <strong>${trueGiB} GiB</strong> (Sektor ${sectors}). Um Datenverlust zu verhindern, begrenzen Sie die aktive Partition auf <strong>${safeGiB} GiB (${safeMB} MB)</strong> und isolieren Sie die verbleibenden <strong>${fakeGiB} GiB</strong> als nicht zugeordneten Speicherplatz:`,
+    repair_none: "KEINE REPARATUR ERFORDERLICH — PHYSISCHE KAPAZITÄT STIMMT MIT ANGEZEIGTER GRÖSSE ÜBEREIN."
+  },
+  zh: {
+    dir: "ltr",
+    status_ready: "就绪 // 直接 DMA 访问",
+    status_probing: "已锁定 // 正在执行 DMA 探针",
+    lbl_target: "磁盘",
+    lbl_dma: "DMA 窗口",
+    lbl_lang: "语言",
+    btn_execute: "执行硬件深度审计",
+    btn_cert: "导出证书",
+    btn_copy: "复制",
+    btn_copied: "已复制",
+    nav_modules: "硬件诊断模块",
+    nav_all: "全局工作台",
+    nav_wafer: "LBA 晶圆图与二分查找",
+    nav_evidence: "取证遥测与主控鉴定",
+    nav_hex: "SCSI 与 MBR 十六进制透视",
+    nav_repair: "安全容量锁定与隔离",
+    nav_bus_state: "当前总线状态",
+    rail_id: "报告编号",
+    rail_lba: "起始扇区",
+    rail_time: "探测耗时",
+    kpi_reported: "系统报告容量",
+    kpi_true: "实测物理 NAND 容量",
+    kpi_phantom: "虚假扩容黑洞比例",
+    kpi_dma: "无缓存真实硬件速度",
+    spec_title: "真实物理闪存 vs. 虚标黑洞地址空间比例",
+    spec_boundary: "精确物理边界",
+    spec_true_lbl: "实测有效闪存",
+    spec_fake_lbl: "虚标黑洞空间",
+    sec_wafer_title: "01 // 物理 LBA 晶圆拓扑与 O(log N) 二分查找收敛轨迹",
+    tag_dma_probes: "4096 字节对齐直接 DMA 探针",
+    hud_title: "扇区探针详情 (悬停方块查看)",
+    hud_offset: "偏移量 (GiB)",
+    hud_lba: "物理 LBA 扇区",
+    hud_byte: "字节地址",
+    hud_status: "状态",
+    hud_written: "写入特征码",
+    hud_read: "硬件回读值",
+    hud_canary: "K=0 金丝雀扇区",
+    hud_lat: "I/O 延迟",
+    canary_ok: "完好 (未发生回卷覆盖)",
+    canary_bad: "被覆盖 (检测到地址回卷!)",
+    bsearch_subtitle: "O(log N) 二分查找物理扇区边界步骤记录",
+    th_step: "步骤",
+    th_window: "搜索区间 (低位 .. 高位 4K 页)",
+    th_mid: "中点测试页",
+    th_loc: "物理偏移 / LBA 扇区",
+    th_state: "判定状态",
+    th_readback: "硬件直接回读值",
+    sec_evidence_title: "02 // 多维取证证据与主控芯片数据库鉴定",
+    tag_ground_truth: "底层硬件真值审计",
+    th_verdict: "判定",
+    th_vector: "检测维度",
+    th_determination: "技术分析结论",
+    th_proof: "底层硬件原始证据",
+    sec_hex_title: "03 // 主控芯片透视、原始 SCSI CDB 与 MBR 十六进制转储",
+    tag_low_level: "底层总线与扇区转储",
+    hex_scsi_lbl: "SCSI INQUIRY 响应 (CDB 0x12 — 36 字节)",
+    hex_mbr_lbl: "MBR 分区表项 #1 (偏移 0x1BE — 16 字节)",
+    hex_desc_lbl: "主控芯片与 USB 总线描述符",
+    sec_repair_title: "04 // 安全容量分区锁定方案 (隔离虚标空间)",
+    tag_safety_margin: "物理边界以下预留 3% 安全裕度",
+    footer_left: "FLASHTRUTH 引擎 // 零幻觉硬件取证审计系统",
+    footer_right: "模式: 直接 DMA | 对齐: 4096 字节 | 无损扇区回滚: 已启用",
+    verdict_fake_main: "检测到虚假扩容伪劣闪存 — 真实物理 NAND 容量仅占标称容量的极小部分（极高数据丢失风险）",
+    verdict_fake_sub: "底层硬件二分查找已证实物理闪存边界之外均为未映射的虚假黑洞地址空间。",
+    verdict_ok_main: "正品存储介质 — 物理 NAND 容量、总线速率与主控芯片均通过验证",
+    verdict_ok_sub: "覆盖全盘 LBA 地址空间的所有无缓存硬件探针均通过读写校验。",
+    repair_desc: (trueGiB, sectors, safeGiB, safeMB, fakeGiB) =>
+      `真实物理 NAND 闪存截止于 <strong>${trueGiB} GiB</strong>（第 ${sectors} 扇区）。为防止文件损坏或地址回卷，请将活动分区锁定在 <strong>${safeGiB} GiB (${safeMB} MB)</strong>，并将剩余 <strong>${fakeGiB} GiB</strong> 虚标空间隔离为未分配空间：`,
+    repair_none: "无需修复 — 真实物理闪存容量与系统报告容量完全一致。"
+  }
+};
+
+function localizeEvidenceItem(e, r, lang) {
+  if (lang === 'en') return { title: e.title_en, detail: e.detail_en };
+  if (lang === 'ar') return { title: e.title_ar, detail: e.detail_ar };
+
+  const repGiB = r.drive.reported_size_gib.toFixed(2);
+  const trueGiB = r.capacity_probe.true_capacity_gib.toFixed(3);
+  const fakePct = r.capacity_probe.fake_percentage.toFixed(2);
+  const wSpd = r.speed_metrics.write_speed_mbps;
+  const rSpd = r.speed_metrics.read_speed_mbps;
+
+  const map = {
+    fr: {
+      PHYSICAL_CAPACITY_FAIL: ["Capacité NAND physique contrefaite détectée", `Le disque annonce ${repGiB} GiB, mais la recherche binaire matérielle prouve que la capacité physique réelle n'est que de ${trueGiB} GiB (${fakePct}% d'espace fantôme).`],
+      PHYSICAL_CAPACITY_PASS: ["Capacité NAND physique vérifiée authentique", `Tous les points de sonde matériels sur ${repGiB} GiB ont réussi la vérification directe.`],
+      CONTROLLER_IDENTITY_FAIL: ["Signature de contrôleur MPtool contrefait connue", `Identifiant ${r.usb.vendor_id}:${r.usb.product_id} (${r.controller_match.actual_controller}) associé aux modèles d'outils de falsification de capacité.`],
+      CONTROLLER_IDENTITY_PASS: ["Identifiant de fabricant OEM de premier rang enregistré", `Contrôleur officiel enregistré sous ${r.controller_match.registered_owner}.`],
+      CONTROLLER_IDENTITY_WARN: ["Contrôleur USB générique sans marque vérifiée", `Contrôleur générique (${r.usb.vendor_id}:${r.usb.product_id}).`],
+      USB_GENERATION_FAIL: ["Fausse revendication commerciale USB 3.0 (Matériel USB 2.0)", `L'appareil annonce '${r.usb.product_string}', mais fonctionne physiquement sur un port USB 2.0 High-Speed (${r.usb.bios_device_path || 'REV_' + r.usb.revision}).`],
+      BOOT_FORENSICS_FAIL: ["Empreinte de partitionnement d'usine MPtool (LBA 32)", `La partition commence au secteur LBA ${r.drive.partition_start_lba} (au lieu de LBA 2048) avec un nombre total de secteurs synthétique (${r.drive.total_sectors}).`],
+      NAND_PERFORMANCE_FAIL: [`Vitesse d'écriture matérielle gravement dégradée (${wSpd} Mo/s)`, `La vitesse d'écriture DMA directe n'est que de ${wSpd} Mo/s (Lecture : ${rSpd} Mo/s), indiquant une mémoire NAND recyclée.`],
+      NAND_PERFORMANCE_PASS: [`Débit matériel lecture/écriture normal (W: ${wSpd} Mo/s | R: ${rSpd} Mo/s)`, `Performances matérielles conformes aux spécifications.`],
+      SECURITY_MALWARE_PASS: ["Aucune menace, ver de raccourci ou fichier caché suspect", "Zéro logiciel malveillant, autorun.inf ou fichier .lnk détecté sur le volume."],
+      SECURITY_MALWARE_FAIL: ["Fichiers exécutables ou raccourcis suspects détectés", `${r.security_scan.suspicious_count} élément(s) suspect(s) détecté(s) sur le support.`]
+    },
+    es: {
+      PHYSICAL_CAPACITY_FAIL: ["Capacidad física NAND falsificada detectada", `La unidad anuncia ${repGiB} GiB, pero la búsqueda binaria por hardware demostró que la capacidad física real es de solo ${trueGiB} GiB (${fakePct}% de espacio fantasma).`],
+      PHYSICAL_CAPACITY_PASS: ["Capacidad física NAND verificada como genuina", `Todos los puntos de sondeo en ${repGiB} GiB superaron la verificación directa.`],
+      CONTROLLER_IDENTITY_FAIL: ["Firma de controlador MPtool falsificado conocida", `Identificador ${r.usb.vendor_id}:${r.usb.product_id} (${r.controller_match.actual_controller}) asociado con plantillas de falsificación de capacidad.`],
+      CONTROLLER_IDENTITY_PASS: ["Identificador de fabricante OEM auténtico registrado", `Controlador oficial registrado a nombre de ${r.controller_match.registered_owner}.`],
+      CONTROLLER_IDENTITY_WARN: ["Controlador USB genérico de marca blanca", `Controlador genérico (${r.usb.vendor_id}:${r.usb.product_id}).`],
+      USB_GENERATION_FAIL: ["Reclamo falso de USB 3.0 (El hardware es USB 2.0)", `El dispositivo anuncia '${r.usb.product_string}', pero opera en un bus USB 2.0 High-Speed (${r.usb.bios_device_path || 'REV_' + r.usb.revision}).`],
+      BOOT_FORENSICS_FAIL: ["Huella de partición de herramienta MPtool de fábrica (LBA 32)", `La partición comienza en LBA ${r.drive.partition_start_lba} (en lugar de LBA 2048) con un recuento de sectores sintético (${r.drive.total_sectors}).`],
+      NAND_PERFORMANCE_FAIL: [`Velocidad de escritura de hardware degradada (${wSpd} MB/s)`, `La velocidad real DMA sin caché es de solo ${wSpd} MB/s (Lectura: ${rSpd} MB/s), lo que indica memoria NAND de descarte.`],
+      NAND_PERFORMANCE_PASS: [`Velocidad de lectura/escritura saludable (W: ${wSpd} MB/s | R: ${rSpd} MB/s)`, `Rendimiento de hardware dentro de los parámetros normales.`],
+      SECURITY_MALWARE_PASS: ["Unidad limpia de malware, gusanos y archivos ocultos sospechosos", "Cero malware, autorun.inf o gusanos .lnk encontrados en el clúster raíz."],
+      SECURITY_MALWARE_FAIL: ["Archivos ejecutables o accesos directos sospechosos detectados", `Se detectaron ${r.security_scan.suspicious_count} elementos sospechosos.`]
+    },
+    de: {
+      PHYSICAL_CAPACITY_FAIL: ["Gefälschte physische NAND-Kapazität erkannt", `Laufwerk gibt ${repGiB} GiB an, aber die Hardware-Binärsuche bewies eine echte physische Kapazität von nur ${trueGiB} GiB (${fakePct}% Phantomspeicher).`],
+      PHYSICAL_CAPACITY_PASS: ["Physische NAND-Kapazität als echt verifiziert", `Alle Hardware-Messpunkte über ${repGiB} GiB haben die Direktprüfung bestanden.`],
+      CONTROLLER_IDENTITY_FAIL: ["Bekannte gefälschte MPtool-Controller-Signatur", `Kennung ${r.usb.vendor_id}:${r.usb.product_id} (${r.controller_match.actual_controller}) ist als Standard-Vorlage für Kapazitätsfälschungen bekannt.`],
+      CONTROLLER_IDENTITY_PASS: ["Registrierte authentische Tier-1-Herstellerkennung", `Offizieller Controller registriert für ${r.controller_match.registered_owner}.`],
+      CONTROLLER_IDENTITY_WARN: ["Generischer USB-Controller ohne Markenbindung", `Generischer Controller (${r.usb.vendor_id}:${r.usb.product_id}).`],
+      USB_GENERATION_FAIL: ["Gefälschte USB-3.0-Angabe (Hardware ist USB 2.0)", `Gerät wirbt mit '${r.usb.product_string}', läuft aber physisch über USB 2.0 High-Speed (${r.usb.bios_device_path || 'REV_' + r.usb.revision}).`],
+      BOOT_FORENSICS_FAIL: ["Fabrik-MPtool-Partitionsfingerabdruck (LBA 32)", `Partition beginnt bei LBA ${r.drive.partition_start_lba} (statt Standard-LBA 2048) mit synthetischer Sektoranzahl (${r.drive.total_sectors}).`],
+      NAND_PERFORMANCE_FAIL: [`Stark degradierte Hardware-Schreibgeschwindigkeit (${wSpd} MB/s)`, `Echte ungepufferte DMA-Schreibgeschwindigkeit beträgt nur ${wSpd} MB/s (Lesen: ${rSpd} MB/s) — Hinweis auf Ausschuss-NAND.`],
+      NAND_PERFORMANCE_PASS: [`Normale Hardware-Lese-/Schreibgeschwindigkeit (W: ${wSpd} MB/s | R: ${rSpd} MB/s)`, `Hardware-Durchsatz im normalen Bereich.`],
+      SECURITY_MALWARE_PASS: ["Laufwerk frei von Malware, Würmern und verdächtigen versteckten Dateien", "Keine Malware, autorun.inf oder .lnk-Würmer im Stammverzeichnis gefunden."],
+      SECURITY_MALWARE_FAIL: ["Verdächtige ausführbare Dateien erkannt", `${r.security_scan.suspicious_count} verdächtige Elemente auf dem Laufwerk gefunden.`]
+    },
+    zh: {
+      PHYSICAL_CAPACITY_FAIL: ["检测到虚假扩容物理 NAND 容量", `磁盘标称 ${repGiB} GiB，但底层硬件二分查找证实真实物理闪存仅为 ${trueGiB} GiB（${fakePct}% 为虚标黑洞空间）。`],
+      PHYSICAL_CAPACITY_PASS: ["物理 NAND 闪存容量验证为真实", `覆盖 ${repGiB} GiB 的所有硬件探针均通过无缓存读写校验。`],
+      CONTROLLER_IDENTITY_FAIL: ["命中已知量产扩容工具 (MPtool) 默认假冒主控特征", `硬件标识 ${r.usb.vendor_id}:${r.usb.product_id} (${r.controller_match.actual_controller}) 属于典型的山寨扩容盘默认模板。`],
+      CONTROLLER_IDENTITY_PASS: ["已注册的一线原厂主控标识", `USB-IF 官方注册厂商：${r.controller_match.registered_owner}。`],
+      CONTROLLER_IDENTITY_WARN: ["通用白牌 USB 存储主控", `通用主控芯片 (${r.usb.vendor_id}:${r.usb.product_id})。`],
+      USB_GENERATION_FAIL: ["虚标 USB 3.0 协议（物理硬件实为 USB 2.0）", `设备名称宣称 '${r.usb.product_string}'，但实际连接在 USB 2.0 高速总线 (${r.usb.bios_device_path || 'REV_' + r.usb.revision})。`],
+      BOOT_FORENSICS_FAIL: ["检出量产工具 (MPtool) LBA-32 分区指纹与人工合成扇区数", `分区起始于 LBA ${r.drive.partition_start_lba}（非操作系统标准的 LBA 2048），且总扇区数 (${r.drive.total_sectors}) 为量产工具人工输入的整数倍。`],
+      NAND_PERFORMANCE_FAIL: [`物理闪存真实写入速度极慢 (${wSpd} MB/s)`, `绕过系统缓存的真实 DMA 写入速度仅为 ${wSpd} MB/s（读取：${rSpd} MB/s），表明内部使用了降级或回收黑片 NAND。`],
+      NAND_PERFORMANCE_PASS: [`物理读写速度正常 (写入: ${wSpd} MB/s | 读取: ${rSpd} MB/s)`, `硬件吞吐性能符合标准。`],
+      SECURITY_MALWARE_PASS: ["未检出恶意程序、快捷方式蠕虫或可疑隐藏文件", "根目录簇原始字节扫描未发现 autorun.inf、.lnk 蠕虫或恶意可执行文件。"],
+      SECURITY_MALWARE_FAIL: ["检出可疑可执行文件或快捷方式病毒", `在磁盘上发现 ${r.security_scan.suspicious_count} 个可疑文件项。`]
+    }
+  };
+
+  const langDict = map[lang] || {};
+  const key = `${e.category}_${e.status}`;
+  if (langDict[key]) {
+    return { title: langDict[key][0], detail: langDict[key][1] };
+  }
+  return { title: e.title_en, detail: e.detail_en };
+}
+
+let currentLang = 'en';
+let currentReport = null;
+
+function setLanguage(lang) {
+  currentLang = I18N[lang] ? lang : 'en';
+  const dict = I18N[currentLang];
+  document.documentElement.lang = currentLang;
+  document.documentElement.dir = dict.dir;
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (dict[key]) el.textContent = dict[key];
+  });
+  if (currentReport) renderReport(currentReport);
+}
+
+function exportCertificate() {
+  window.open(`/api/export-html?lang=${encodeURIComponent(currentLang)}`, '_blank');
+}
+
+function toggleTheme() {
+  const html = document.documentElement;
+  const next = html.getAttribute('data-theme') === 'obsidian' ? 'paper' : 'obsidian';
+  html.setAttribute('data-theme', next);
+}
+
+function filterSection(sectionId, btn) {
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  const sections = ['sec-wafer', 'sec-evidence', 'sec-hex', 'sec-repair'];
+  sections.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.style.display = (sectionId === 'all' || sectionId === id) ? 'block' : 'none';
+  });
+}
+
+async function loadDrives() {
+  const sel = document.getElementById('driveSelect');
+  sel.innerHTML = '<option>...</option>';
+  try {
+    const res = await fetch('/api/drives');
+    const data = await res.json();
+    sel.innerHTML = '';
+    if (data.drives && data.drives.length > 0) {
+      data.drives.forEach(d => {
+        const opt = document.createElement('option');
+        opt.value = d.device_path;
+        const busTag = d.bus_type ? `${d.bus_type}/${d.media_type || 'DISK'}` : (d.file_system || 'RAW');
+        const mdl = d.hardware_model ? ` — ${d.hardware_model}` : '';
+        opt.textContent = `${d.device_path} [${busTag}] ${d.reported_size_gib.toFixed(2)} GiB (${d.reported_size_gb.toFixed(2)} GB)${mdl}`;
+        sel.appendChild(opt);
+      });
+    } else {
+      const opt = document.createElement('option');
+      opt.value = 'D:';
+      opt.textContent = 'D:';
+      sel.appendChild(opt);
+    }
+  } catch (e) {
+    sel.innerHTML = '<option value="D:">D:</option>';
+  }
+}
+
+async function checkInitialReport() {
+  try {
+    const res = await fetch('/api/last-report');
+    if (res.status === 200) {
+      const rep = await res.json();
+      currentReport = rep;
+      renderReport(rep);
+    }
+  } catch (e) {}
+}
+
+function startScan() {
+  const dict = I18N[currentLang];
+  const drive = document.getElementById('driveSelect').value || 'D:';
+  const speedMB = document.getElementById('speedSelect').value || '8';
+  const btn = document.getElementById('scanBtn');
+  const strip = document.getElementById('progressStrip');
+  const stage = document.getElementById('progressStage');
+  const pct = document.getElementById('progressPercent');
+  const fill = document.getElementById('progressFill');
+  const dot = document.getElementById('statusDot');
+  const stTxt = document.getElementById('statusText');
+
+  btn.disabled = true;
+  strip.style.display = 'block';
+  dot.classList.add('busy');
+  stTxt.textContent = dict.status_probing;
+  stage.textContent = '...';
+  pct.textContent = '0%';
+  fill.style.width = '0%';
+
+  const es = new EventSource(`/api/scan-stream?drive=${encodeURIComponent(drive)}&speed_mb=${speedMB}`);
+  es.addEventListener('progress', e => {
+    const d = JSON.parse(e.data);
+    stage.textContent = d.message.toUpperCase();
+    pct.textContent = d.percent + '%';
+    fill.style.width = d.percent + '%';
+  });
+  es.addEventListener('complete', e => {
+    es.close();
+    btn.disabled = false;
+    strip.style.display = 'none';
+    dot.classList.remove('busy');
+    stTxt.textContent = I18N[currentLang].status_ready;
+    currentReport = JSON.parse(e.data);
+    renderReport(currentReport);
+  });
+  es.addEventListener('error', () => {
+    es.close();
+    btn.disabled = false;
+    dot.classList.remove('busy');
+    stTxt.textContent = I18N[currentLang].status_ready;
+  });
+}
+
+function formatHexRows(hexStr) {
+  if (!hexStr) return '<div class="hex-line"><span class="hex-off">0000</span><span class="hex-bytes">NO DATA</span></div>';
+  let out = '';
+  for (let i = 0; i < hexStr.length; i += 32) {
+    const slice = hexStr.substring(i, i + 32);
+    const bytes = [];
+    let ascii = '';
+    for (let j = 0; j < slice.length; j += 2) {
+      const bHex = slice.substring(j, j + 2);
+      bytes.push(bHex);
+      const code = parseInt(bHex, 16);
+      ascii += (code >= 32 && code < 127) ? String.fromCharCode(code) : '.';
+    }
+    const offStr = (i / 2).toString(16).toUpperCase().padStart(4, '0');
+    const hexCol = bytes.join(' ').padEnd(47, ' ');
+    out += `<div class="hex-line"><span class="hex-off">${offStr}</span><span class="hex-bytes">${hexCol}</span><span class="hex-ascii">|${ascii.padEnd(16, ' ')}|</span></div>`;
+  }
+  return out;
+}
+
+function showHud(p) {
+  const dict = I18N[currentLang];
+  document.getElementById('hudGiB').textContent = `${p.offset_gib} GiB`;
+  document.getElementById('hudLba').textContent = `${p.physical_lba.toLocaleString()} (0x${p.physical_lba.toString(16).toUpperCase()})`;
+  document.getElementById('hudByte').textContent = `${p.physical_byte.toLocaleString()} B`;
+  document.getElementById('hudStatus').textContent = p.status;
+  document.getElementById('hudWritten').textContent = p.written_tag_hex;
+  document.getElementById('hudRead').textContent = p.read_tag_hex;
+  document.getElementById('hudCanary').textContent = p.canary_intact ? dict.canary_ok : dict.canary_bad;
+  document.getElementById('hudLat').textContent = `${p.latency_ms} ms`;
+}
+
+function copyText(id, btn) {
+  const dict = I18N[currentLang];
+  const txt = document.getElementById(id).innerText;
+  navigator.clipboard.writeText(txt);
+  btn.textContent = dict.btn_copied;
+  setTimeout(() => btn.textContent = dict.btn_copy, 1400);
+}
+
+function renderReport(r) {
+  const dict = I18N[currentLang];
+  document.getElementById('reportWorkspace').style.display = 'block';
+
+  document.getElementById('railReportId').textContent = r.report_id;
+  document.getElementById('railVidPid').textContent = `${r.usb.vendor_id}:${r.usb.product_id}`;
+  document.getElementById('railUsbRev').textContent = `REV_${r.usb.revision || '0200'}`;
+  document.getElementById('railStartLba').textContent = `LBA ${r.drive.partition_start_lba}`;
+  document.getElementById('railProbeTime').textContent = `${r.capacity_probe.duration_seconds}s`;
+
+  const vp = document.getElementById('verdictPanel');
+  const isAuth = r.trust.is_authentic;
+  const sigColor = isAuth ? 'var(--signal-emerald)' : 'var(--signal-crimson)';
+  vp.className = isAuth ? 'verdict-panel' : 'verdict-panel counterfeit';
+
+  const vTag = document.getElementById('verdictTag');
+  vTag.style.color = sigColor;
+  vTag.textContent = `${r.report_id} // ${r.controller_match.category} // ${r.capacity_probe.failure_mode}`;
+
+  // Pure single-language verdict (Zero mixing!)
+  document.getElementById('verdictHeadline').textContent = isAuth ? dict.verdict_ok_main : dict.verdict_fake_main;
+  document.getElementById('verdictSecondary').textContent = isAuth ? dict.verdict_ok_sub : dict.verdict_fake_sub;
+
+  const scNum = document.getElementById('scoreNumber');
+  scNum.textContent = `${r.trust.score}/100`;
+  scNum.style.color = sigColor;
+
+  const scGrd = document.getElementById('scoreGrade');
+  scGrd.textContent = r.trust.grade;
+  scGrd.style.color = sigColor;
+
+  document.getElementById('valReported').textContent = `${r.drive.reported_size_gib.toFixed(2)} GiB`;
+  document.getElementById('metaReported').textContent = `${r.drive.reported_size_gb.toFixed(2)} GB (${r.drive.total_sectors.toLocaleString()} LBA)`;
+
+  const vTrue = document.getElementById('valTrue');
+  vTrue.textContent = `${r.capacity_probe.true_capacity_gib.toFixed(3)} GiB`;
+  vTrue.style.color = sigColor;
+  document.getElementById('metaTrue').textContent = `${r.capacity_probe.true_capacity_gb.toFixed(2)} GB (${r.capacity_probe.true_valid_sectors_512.toLocaleString()} LBA)`;
+
+  const vFake = document.getElementById('valFakePct');
+  vFake.textContent = `${r.capacity_probe.fake_percentage.toFixed(2)}%`;
+  vFake.style.color = sigColor;
+  document.getElementById('metaFakeMode').textContent = `0x${r.capacity_probe.first_invalid_4k_page.toString(16).toUpperCase()} -> ${r.capacity_probe.failure_mode}`;
+
+  document.getElementById('valSpeed').textContent = `${r.speed_metrics.write_speed_mbps} / ${r.speed_metrics.read_speed_mbps} MB/s`;
+  document.getElementById('metaSpeed').textContent = `${r.usb.bios_device_path || 'USB'} // REV_${r.usb.revision || '0200'}`;
+
+  const truePct = Math.max(1.5, 100 - r.capacity_probe.fake_percentage);
+  const fakePct = 100 - truePct;
+  document.getElementById('specTrueBar').style.width = `${truePct}%`;
+  document.getElementById('specFakeBar').style.width = `${fakePct}%`;
+  document.getElementById('specBoundaryLabel').textContent = `${dict.spec_boundary}: LBA ${r.capacity_probe.true_valid_sectors_512.toLocaleString()} (${r.capacity_probe.true_capacity_bytes.toLocaleString()} B)`;
+  document.getElementById('specLegendTrue').textContent = `■ ${dict.spec_true_lbl}: ${r.capacity_probe.true_capacity_gib.toFixed(3)} GiB (${(100 - r.capacity_probe.fake_percentage).toFixed(2)}%)`;
+  document.getElementById('specLegendFake').textContent = `▨ ${dict.spec_fake_lbl}: ${(r.drive.reported_size_gib - r.capacity_probe.true_capacity_gib).toFixed(2)} GiB (${r.capacity_probe.fake_percentage.toFixed(2)}%)`;
+
+  const wGrid = document.getElementById('waferGrid');
+  wGrid.innerHTML = '';
+  const probes = r.capacity_probe.grid_probes || [];
+  probes.forEach((p, idx) => {
+    const cell = document.createElement('div');
+    cell.className = `wafer-cell st-${p.status}`;
+    cell.innerHTML = `<div style="font-weight:700;">${p.offset_gib}G</div><div style="opacity:0.75;font-size:9px;">${p.status === 'VALID' ? 'OK' : 'VOID'} // ${p.latency_ms}ms</div>`;
+    cell.onmouseenter = () => showHud(p);
+    wGrid.appendChild(cell);
+    if (idx === 0) showHud(p);
+  });
+
+  const bsBody = document.getElementById('bsearchBody');
+  bsBody.innerHTML = '';
+  (r.capacity_probe.binary_search_steps || []).forEach(s => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>#${String(s.step).padStart(2, '0')}</td>
+      <td>0x${s.low_page_4k.toString(16).toUpperCase()} .. 0x${s.high_page_4k.toString(16).toUpperCase()}</td>
+      <td>0x${s.mid_page_4k.toString(16).toUpperCase()} (${s.mid_page_4k.toLocaleString()})</td>
+      <td>${s.mid_offset_gib.toFixed(4)} GiB // LBA ${s.mid_physical_lba.toLocaleString()}</td>
+      <td><span class="status-pill pill-${s.valid ? 'PASS' : 'FAIL'}">${s.valid ? 'VALID NAND' : '0xFF VOID'}</span></td>
+      <td>${s.read_back_hex}</td>
+    `;
+    bsBody.appendChild(tr);
+  });
+
+  // Pure single-language Evidence rows (Zero secondary language mixing!)
+  const evBody = document.getElementById('evidenceBody');
+  evBody.innerHTML = '';
+  (r.trust.evidence || []).forEach(e => {
+    const loc = localizeEvidenceItem(e, r, currentLang);
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><span class="status-pill pill-${e.status}">${e.status} (${e.impact})</span></td>
+      <td><div style="font-weight:700;">${loc.title}</div></td>
+      <td style="line-height:1.55;">${loc.detail}</td>
+      <td><div class="mono" style="font-size:11px;background:var(--bg-code);border:1px solid var(--border-hairline);padding:6px 8px;word-break:break-all;direction:ltr;text-align:left;">${e.raw_proof}</div></td>
+    `;
+    evBody.appendChild(tr);
+  });
+
+  document.getElementById('hexScsiInquiry').innerHTML = formatHexRows(r.scsi.inquiry_hex);
+  document.getElementById('hexMbrPart').innerHTML = formatHexRows(r.boot_forensics.mbr_partition_entry1_hex);
+  document.getElementById('controllerSpecBox').innerHTML = `
+    <div class="hud-row"><span>BUS & MEDIA TYPE</span><span>${r.drive.bus_type || 'USB'} // ${r.drive.media_type || 'Flash'} (FW: ${r.drive.firmware_version || r.usb.revision || 'N/A'})</span></div>
+    <div class="hud-row"><span>HARDWARE MODEL</span><span>${r.drive.hardware_model || r.usb.product_string || 'N/A'}</span></div>
+    <div class="hud-row"><span>OEM MANUFACTURER</span><span>${r.drive.oem_manufacturer || r.controller_match.registered_owner}</span></div>
+    <div class="hud-row"><span>CONTROLLER / BRIDGE</span><span>${r.drive.controller_vendor || r.controller_match.actual_controller}</span></div>
+    <div class="hud-row"><span>IEEE OUI / VID:PID</span><span>${r.drive.ieee_oui || (r.usb.vendor_id + ':' + r.usb.product_id)}</span></div>
+    <div class="hud-row"><span>SERIAL / EUI-64</span><span>${r.usb.serial_number || r.drive.hardware_serial || 'N/A'}</span></div>
+    <div class="hud-row"><span>ACPI / BIOS PORT</span><span>${r.usb.bios_device_path || 'PCIe / Native Bus'}</span></div>
+    <div class="hud-row"><span>FACTORY MPTOOL</span><span>${r.controller_match.common_mptools}</span></div>
+    <div class="hud-row"><span>SCSI VENDOR / PROD</span><span>'${r.scsi.vendor_id_8}' / '${r.scsi.product_id_16}'</span></div>
+    <div class="hud-row"><span>SCSI READ CAPACITY</span><span>0x${r.scsi.read_capacity_hex || 'N/A'} (${r.scsi.reported_total_sectors.toLocaleString()} LBA)</span></div>
+    <div class="hud-row"><span>PARTITION START</span><span>LBA ${r.drive.partition_start_lba} (Offset ${r.drive.partition_offset} B)</span></div>
+  `;
+
+  const repBody = document.getElementById('repairBody');
+  if (r.repair_plan && r.repair_plan.needed) {
+    repBody.innerHTML = `
+      <div style="margin-bottom:14px;color:var(--text-secondary);font-size:12px;">
+        ${dict.repair_desc(
+          r.capacity_probe.true_capacity_gib.toFixed(3),
+          r.capacity_probe.true_valid_sectors_512.toLocaleString(),
+          r.repair_plan.recommended_safe_gib,
+          r.repair_plan.recommended_safe_mb,
+          r.repair_plan.quarantined_fake_gib
+        )}
+      </div>
+      <div class="nav-section-label" style="padding:0;">WINDOWS POWERSHELL (ADMINISTRATOR)</div>
+      <div class="cmd-block"><span id="cmdPs">${r.repair_plan.windows_powershell_cmd}</span><button class="copy-btn" onclick="copyText('cmdPs', this)">${dict.btn_copy}</button></div>
+      <div class="nav-section-label" style="padding:0;">LINUX (PARTED + MKFS.EXFAT)</div>
+      <div class="cmd-block"><span id="cmdLinux">${r.repair_plan.linux_parted_cmd}</span><button class="copy-btn" onclick="copyText('cmdLinux', this)">${dict.btn_copy}</button></div>
+      <div class="nav-section-label" style="padding:0;">MACOS (DISKUTIL)</div>
+      <div class="cmd-block"><span id="cmdMac">${r.repair_plan.macos_diskutil_cmd}</span><button class="copy-btn" onclick="copyText('cmdMac', this)">${dict.btn_copy}</button></div>
+    `;
+  } else {
+    repBody.innerHTML = `<div class="mono" style="color:var(--signal-emerald);">${dict.repair_none}</div>`;
+  }
+}
+
+loadDrives();
+checkInitialReport();
+</script>
+</body>
+</html>

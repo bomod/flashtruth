@@ -1,0 +1,35 @@
+name: Counterfeit Drive / Controller Signature Submission
+description: Submit a newly discovered counterfeit USB flash drive, SSD, HDD, or controller signature to the FlashTruth database.
+title: "[SIGNATURE]: VID:PID / Model — Claimed vs True Capacity"
+labels: ["hardware-signature", "triage"]
+body:
+  - type: input
+    id: vid_pid
+    attributes:
+      label: USB VID:PID or PCIe Vendor:Device / IEEE OUI
+      description: Found in FlashTruth report under Section [1] (e.g. 048D:1234 or 00-A0-75)
+      placeholder: "048D:1234"
+    validations:
+      required: true
+  - type: input
+    id: scsi_strings
+    attributes:
+      label: SCSI Inquiry Vendor / Product / Revision (or Hardware Model)
+      placeholder: "'Flash' / 'Disk 3.0' (Rev '2.00')"
+    validations:
+      required: true
+  - type: input
+    id: capacities
+    attributes:
+      label: Reported Capacity vs. Verified Physical NAND Capacity
+      placeholder: "Claimed: 1953.12 GiB (2 TB) -> True Physical: 29.815 GiB (32.01 GB)"
+    validations:
+      required: true
+  - type: textarea
+    id: json_report
+    attributes:
+      label: FlashTruth JSON / CLI Audit Output
+      description: Paste the output of `flashtruth --drive X:` or attach the exported `.json` file.
+      render: shell
+    validations:
+      required: true

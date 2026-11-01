@@ -1,0 +1,61 @@
+name: Cross-Platform Build & Vet CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+permissions:
+  contents: read
+
+jobs:
+  build-matrix:
+    name: Build (${{ matrix.goos }}/${{ matrix.goarch }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - goos: windows
+            goarch: amd64
+            ext: .exe
+          - goos: windows
+            goarch: arm64
+            ext: .exe
+          - goos: linux
+            goarch: amd64
+            ext: ""
+          - goos: linux
+            goarch: arm64
+            ext: ""
+          - goos: darwin
+            goarch: amd64
+            ext: ""
+          - goos: darwin
+            goarch: arm64
+            ext: ""
+
+    steps:
+      - name: Checkout Source
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23.x'
+
+      - name: Go Vet
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+          CGO_ENABLED: 0
+        run: go vet ./...
+
+      - name: Compile Static Binary
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+          CGO_ENABLED: 0
+        run: |
+          go build -trimpath -ldflags="-s -w" -o dist/flashtruth-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.ext }} .
