@@ -28,18 +28,44 @@ Traditional tools (such as `H2testw`, `F3`, or `ValiDrive`) either take hours to
 
 ## Empirical Hardware Forensics Case Studies (Real-World Counterfeits Unmasked in < 1.2s)
 
-See **[CASE_STUDIES.md](CASE_STUDIES.md)** for our full forensic investigation, 18-step $O(\log N)$ binary search traces, and raw JSON telemetry datasets ([`case-01-2tb-usb3-flash-drive.json`](docs/case-studies/case-01-2tb-usb3-flash-drive.json) & [`case-02-500gb-external-ssd.json`](docs/case-studies/case-02-500gb-external-ssd.json)).
+Below is the complete empirical hardware investigation conducted with **FlashTruth** (also available as a standalone document in **[CASE_STUDIES.md](https://github.com/bomod/flashtruth/blob/main/CASE_STUDIES.md)** alongside raw JSON telemetry datasets **[`case-01-2tb-usb3-flash-drive.json`](https://github.com/bomod/flashtruth/blob/main/docs/case-studies/case-01-2tb-usb3-flash-drive.json)** and **[`case-02-500gb-external-ssd.json`](https://github.com/bomod/flashtruth/blob/main/docs/case-studies/case-02-500gb-external-ssd.json)**).
 
-| Forensic Metric | Case Study #1: Fake "2.0 TB USB 3.0 Flash Drive" | Case Study #2: Fake "500 GB Portable External SSD" |
-| :--- | :--- | :--- |
-| **Report ID** | [`FT-0EA813AE7334`](docs/case-studies/case-01-2tb-usb3-flash-drive.json) | [`FT-6251FDAB06FD`](docs/case-studies/case-02-500gb-external-ssd.json) |
-| **Advertised Product** | `2.0 TB` (`1953.13 GiB`) SuperSpeed USB 3.0 Drive | `500 GB` (`500.98 GiB`) External Portable SSD (`Label: SSD`) |
-| **True Physical NAND** | **`29.815 GiB` (`32.01 GB`)** *(32 GB nominal die)* | **`58.495 GiB` (`62.81 GB`)** *(64 GB nominal die)* |
-| **Phantom Void Ratio** | **`98.47%` Fake** (`BLACK_HOLE_0xFF` past Page `0x7742EF`) | **`88.32%` Fake** (`BLACK_HOLE_0xFF` past Page `0xE9FAFF`) |
-| **True Hardware Identity** | `FirstChip FC1178/FC1179` (`VID_048D&PID_1234`, `REV_0200`) | **Not an SSD!** `FirstChip FC1178/FC1179` USB 2.0 thumb drive glued inside an SSD shell (`RMB=1`, `VendorCo ProductCode`) |
-| **True DMA Speed** | **`0.30 – 2.26 MB/s` Write** / `30.57 MB/s` Read (USB 2.0 HS) | **`5.18 MB/s` Write** / `23.26 MB/s` Read (USB 2.0 HS) |
-| **Shared Factory MPtool Signature** | `MBR Sig: 33B82CFA` \| `exFAT VSN: 76E8CACF` | `MBR Sig: 33B82CFA` \| `exFAT VSN: 76E8CACF` *(Identical Factory Clone!)* |
-| **Detection Time** | **`1.19 seconds`** | **`0.70 seconds`** |
+### 1. Comparative Forensic Matrix (2TB USB 3.0 Flash Drive vs. 500GB External SSD)
+
+| Forensic Metric | Case Study #1: Fake "2.0 TB USB 3.0 Flash Drive" | Case Study #2: Fake "500 GB Portable External SSD" | Genuine Tier-1 External SSD (Reference) |
+| :--- | :--- | :--- | :--- |
+| **Report ID** | [`FT-0EA813AE7334`](https://github.com/bomod/flashtruth/blob/main/docs/case-studies/case-01-2tb-usb3-flash-drive.json) | [`FT-6251FDAB06FD`](https://github.com/bomod/flashtruth/blob/main/docs/case-studies/case-02-500gb-external-ssd.json) | — |
+| **Advertised Product** | `2.0 TB` (`1953.13 GiB`) SuperSpeed USB 3.0 Drive | `500 GB` (`500.98 GiB`) External Portable SSD (`Label: SSD`) | `500 GB` / `1 TB` USB 3.2 Gen 2 NVMe/SATA SSD |
+| **True Physical NAND** | **`29.815 GiB` (`32.01 GB`)** *(32 GB nominal die)* | **`58.495 GiB` (`62.81 GB`)** *(64 GB nominal die)* | `100%` of advertised LBA count |
+| **Phantom Void Ratio** | **`98.47%` Fake** (`BLACK_HOLE_0xFF` past Page `0x7742EF`) | **`88.32%` Fake** (`BLACK_HOLE_0xFF` past Page `0xE9FAFF`) | `0.00%` |
+| **Last Valid 4KB Page** | `0x7742EF` (`Page 7,815,919` / `Sector 62,527,359`) | `0xE9FAFF` (`Page 15,334,143` / `Sector 122,673,151`) | Matches reported capacity |
+| **First Invalid 4KB Page** | `0x7742F0` (`BLACK_HOLE_0xFF`) | `0xE9FB00` (`BLACK_HOLE_0xFF`) | None |
+| **True Hardware Identity** | `FirstChip FC1178/FC1179` (`VID_048D&PID_1234`, `REV_0200`) | **Not an SSD!** `FirstChip FC1178/FC1179` USB 2.0 thumb drive glued inside an SSD shell (`RMB=1`, `VendorCo ProductCode`) | Authentic NVMe/SATA Bridge (`ASMedia`, `Realtek`, `Phison`) |
+| **Negotiated Bus Path** | `\_SB.PC00.XHCI.RHUB.HS08` (**USB 2.0 High-Speed**) | `\_SB.PC00.XHCI.RHUB.HS08` (**USB 2.0 High-Speed**) | `\_SB.PC00.XHCI.RHUB.SSxx` (**USB 3.x SuperSpeed**) |
+| **True DMA Speed** | **`0.30 – 2.26 MB/s` Write** / `30.57 MB/s` Read | **`5.18 MB/s` Write** / `23.26 MB/s` Read | **`450 – 1,050 MB/s` Write & Read** |
+| **Shared Factory MPtool Signature** | `MBR Sig: 33B82CFA` \| `exFAT VSN: 76E8CACF` | `MBR Sig: 33B82CFA` \| `exFAT VSN: 76E8CACF` *(Identical Factory Clone!)* | Unique cryptographic random per drive |
+| **Detection Time** | **`1.19 seconds`** | **`0.70 seconds`** | `~1.0 second` |
+| **FlashTruth Verdict** | **`0 / 100 [F // COUNTERFEIT]`** | **`0 / 100 [F // COUNTERFEIT]`** | **`100 / 100 [A+ // AUTHENTIC]`** |
+
+### 2. Smoking-Gun Discovery: Identical Factory MPtool Fingerprint (`33B82CFA` / `76E8CACF`)
+
+Although **Device #1** was sold as a **"2 TB USB 3.0 Flash Drive"** (`Flash Disk 3.0`) and **Device #2** was sold in an external enclosure as a **"500 GB Portable External SSD"** (`VendorCo ProductCode`, label `SSD`), low-level boot-sector forensics proved they were mass-produced by the **exact same factory capacity-spoofing tool (`FirstChip FcMpTool`)**:
+- **Identical USB Hardware ID:** `VID_048D&PID_1234` (`REV_0200`).
+- **Identical Hardcoded MBR Disk Signature (`0x1B8`):** `"33B82CFA"` on both drives (whereas standard OS formatters generate a random 32-bit signature).
+- **Identical MBR Bootstrap Code:** `"FA33C08ED0BC007C8BF45007501FFBFCBF0006B90001F2A5EA1D060000BEBE07"` on both drives.
+- **Identical exFAT Volume Serial Number:** `"76E8CACF"` on both drives.
+
+```mermaid
+flowchart TD
+    A["Counterfeit Factory Assembly Line (MPtool Station)"] --> B["FirstChip FcMpTool / Chipsbank UMPTool Firmware Injector"]
+    B --> C["Hardcoded Template Applied:<br/>• VID:PID = 048D:1234 (REV_0200)<br/>• MBR Signature = 0x33B82CFA<br/>• exFAT Serial = 0x76E8CACF<br/>• Cluster Size = 128 KB (131072 B)"]
+    C --> D["Product Line A: USB-A Thumb Drive Shell<br/>• 32 GB Scrap NAND Die (29.815 GiB)<br/>• Spoofed LBA Count = 4,096,000,000 (2.0 TB)<br/>• SCSI Name: 'Flash Disk 3.0'"]
+    C --> E["Product Line B: 'External Portable SSD' Case<br/>• 64 GB Planar NAND Die (58.495 GiB)<br/>• Spoofed LBA Count = 1,050,624,000 (537.9 GB)<br/>• SCSI Name: 'VendorCo ProductCode' (Label: 'SSD')"]
+    D --> F["FlashTruth O(log N) Audit:<br/>Exposed in 1.19s (98.47% Fake)"]
+    E --> G["FlashTruth O(log N) Audit:<br/>Exposed in 0.70s (88.32% Fake)"]
+```
+
+### 3. Case Study #2 Deep Dive: Fake "500 GB External SSD" (`FT-6251FDAB06FD`)
 
 ```text
 --------------------------------------------------------------------------------
@@ -68,6 +94,36 @@ See **[CASE_STUDIES.md](CASE_STUDIES.md)** for our full forensic investigation, 
       Fake Phantom Ratio : 88.32% (475110801408 bytes fake)
       Data Preserved     : true (100% Non-Destructive Rollback)
 ```
+
+#### Exact $O(\log N)$ Binary Search Convergence Trace (`0.70s` on `E:`)
+
+After the coarse LBA grid sweep found `VALID` storage at `32 GiB` (`Page 0x810000`) and `FAKE_VOID_FF` at `60 GiB` (`Page 0xF10000`), **FlashTruth** narrowed the `7,340,032`-page range down to the **single exact 4KB physical boundary page (`0xE9FAFF` vs. `0xE9FB00`)**:
+
+| Step | Low 4K Page | High 4K Page | Probed Mid Page | Offset (`GiB`) | Physical Sector (`LBA`) | Hardware Readback (`8B Tag`) | Result |
+| :---: | :--- | :--- | :--- | :---: | :---: | :--- | :---: |
+| **1** | `0x810000` | `0xF0FFFF` | `0xB8FFFF` | `46.250 GiB` | `96,993,272` | `FD59C3C1A1B7A94E` | `VALID` |
+| **2** | `0xB90000` | `0xF0FFFF` | `0xD4FFFF` | `53.250 GiB` | `111,673,336` | `C90A75161B854EE3` | `VALID` |
+| **3** | `0xD50000` | `0xF0FFFF` | `0xE2FFFF` | `56.750 GiB` | `119,013,368` | `645E6FE863664728` | `VALID` |
+| **4** | `0xE30000` | `0xF0FFFF` | `0xE9FFFF` | `58.500 GiB` | `122,683,384` | `FFFFFFFFFFFFFFFF` | **`VOID_FF`** |
+| **5** | `0xE30000` | `0xE9FFFE` | `0xE67FFF` | `57.625 GiB` | `120,848,376` | `E5AC4BB254A810F6` | `VALID` |
+| **12** | `0xE9F200` | `0xE9FFFE` | `0xE9F8FF` | `58.493 GiB` | `122,669,048` | `C8653DE80E5629E9` | `VALID` |
+| **13** | `0xE9F900` | `0xE9FFFE` | `0xE9FC7F` | `58.497 GiB` | `122,676,216` | `FFFFFFFFFFFFFFFF` | **`VOID_FF`** |
+| **17** | `0xE9FAC0` | `0xE9FB2E` | `0xE9FAF7` | `58.495 GiB` | `122,673,080` | `E5F7B438FF2F2EE2` | `VALID` |
+| **20** | `0xE9FAF8` | `0xE9FB04` | `0xE9FAFE` | `58.495 GiB` | `122,673,136` | `C8D9EC4D05737CF7` | `VALID` |
+| **21** | `0xE9FAFF` | `0xE9FB04` | `0xE9FB01` | `58.495 GiB` | `122,673,160` | `FFFFFFFFFFFFFFFF` | **`VOID_FF`** |
+| **22** | `0xE9FAFF` | `0xE9FB00` | `0xE9FAFF` | **`58.4951 GiB`** | **`122,673,144`** | `F0DC2DA426E84F4B` | **`LAST VALID PAGE`** |
+
+### 4. الملخص باللغة العربية (Arabic Summary of Case Studies)
+
+تُثبت هاتان التجربتان العمليتان كفاءة محرك **FlashTruth** في كشف أحدث أساليب الغش التجاري في وسائط التخزين خلال أقل من ثانية واحدة:
+1. **التجربة الأولى (`FT-0EA813AE7334` — فلاشة تدّعي سعة `2 TB` وواجهة `USB 3.0`):**
+   - كشف البرنامج في **`1.19` ثانية** أن السعة الفيزيائية الحقيقية هي **`29.815 GiB` (`32.01 GB`)** فقط وأن **`98.47%`** من السعة وهمية (`BLACK_HOLE_0xFF`)، وأنها تعمل بمتحكم صيني مقلد (`FirstChip FC1178/FC1179` — `VID_048D&PID_1234`) على منفذ `USB 2.0` فقط.
+   - نجح البرنامج في إصلاحها عتادياً وعزل المساحة الوهمية وتثبيت نظام `Linux Mint 22.3` القابل للإقلاع عليها بنجاح.
+2. **التجربة الثانية (`FT-6251FDAB06FD` — هارد ديسك خارجي يدّعي أنه `500 GB SSD`):**
+   - كشف البرنامج في **`0.70` ثانية** أن القرص **ليس SSD على الإطلاق**، بل هو فلاشة `USB 2.0` رخيصة (`Removable Flash`, `VID_048D&PID_1234`, `VendorCo ProductCode`) مخبأة داخل علبة هارد خارجي!
+   - السعة الحقيقية لشريحة الفلاش بالداخل هي **`58.495 GiB` (`62.81 GB`)** فقط، بينما **`88.32%`** (`442.49 GiB`) هي مساحة وهمية تبتلع الملفات وتتلفها فور تجاوز حاجز `58.49 GiB`، وسرعة الكتابة الحقيقية لا تتجاوز **`5.18 MB/s`**.
+3. **الدليل الجنائي القاطع على وحدة المصدر المصنعي للغش:**
+   - أثبت الفحص الجنائي لقطاعات الإقلاع (`MBR` و`VBR`) أن كلاً من "فلاشة الـ 2 تيرابايت" و"هارد الـ 500 جيجابايت SSD" يحملان **نفس البصمة السداسية المبرمجة مصنعياً** (`MBR Signature = 33B82CFA` و`Volume Serial = 76E8CACF` و`VID:PID = 048D:1234`)، مما يثبت أنهما خرجا من نفس أداة التزوير المصنعية (`FirstChip FcMpTool`).
 
 ---
 
