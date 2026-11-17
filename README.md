@@ -113,24 +113,12 @@ After the coarse LBA grid sweep found `VALID` storage at `32 GiB` (`Page 0x81000
 | **21** | `0xE9FAFF` | `0xE9FB04` | `0xE9FB01` | `58.495 GiB` | `122,673,160` | `FFFFFFFFFFFFFFFF` | **`VOID_FF`** |
 | **22** | `0xE9FAFF` | `0xE9FB00` | `0xE9FAFF` | **`58.4951 GiB`** | **`122,673,144`** | `F0DC2DA426E84F4B` | **`LAST VALID PAGE`** |
 
-### 4. الملخص باللغة العربية (Arabic Summary of Case Studies)
-
-تُثبت هاتان التجربتان العمليتان كفاءة محرك **FlashTruth** في كشف أحدث أساليب الغش التجاري في وسائط التخزين خلال أقل من ثانية واحدة:
-1. **التجربة الأولى (`FT-0EA813AE7334` — فلاشة تدّعي سعة `2 TB` وواجهة `USB 3.0`):**
-   - كشف البرنامج في **`1.19` ثانية** أن السعة الفيزيائية الحقيقية هي **`29.815 GiB` (`32.01 GB`)** فقط وأن **`98.47%`** من السعة وهمية (`BLACK_HOLE_0xFF`)، وأنها تعمل بمتحكم صيني مقلد (`FirstChip FC1178/FC1179` — `VID_048D&PID_1234`) على منفذ `USB 2.0` فقط.
-   - نجح البرنامج في إصلاحها عتادياً وعزل المساحة الوهمية وتثبيت نظام `Linux Mint 22.3` القابل للإقلاع عليها بنجاح.
-2. **التجربة الثانية (`FT-6251FDAB06FD` — هارد ديسك خارجي يدّعي أنه `500 GB SSD`):**
-   - كشف البرنامج في **`0.70` ثانية** أن القرص **ليس SSD على الإطلاق**، بل هو فلاشة `USB 2.0` رخيصة (`Removable Flash`, `VID_048D&PID_1234`, `VendorCo ProductCode`) مخبأة داخل علبة هارد خارجي!
-   - السعة الحقيقية لشريحة الفلاش بالداخل هي **`58.495 GiB` (`62.81 GB`)** فقط، بينما **`88.32%`** (`442.49 GiB`) هي مساحة وهمية تبتلع الملفات وتتلفها فور تجاوز حاجز `58.49 GiB`، وسرعة الكتابة الحقيقية لا تتجاوز **`5.18 MB/s`**.
-3. **الدليل الجنائي القاطع على وحدة المصدر المصنعي للغش:**
-   - أثبت الفحص الجنائي لقطاعات الإقلاع (`MBR` و`VBR`) أن كلاً من "فلاشة الـ 2 تيرابايت" و"هارد الـ 500 جيجابايت SSD" يحملان **نفس البصمة السداسية المبرمجة مصنعياً** (`MBR Signature = 33B82CFA` و`Volume Serial = 76E8CACF` و`VID:PID = 048D:1234`)، مما يثبت أنهما خرجا من نفس أداة التزوير المصنعية (`FirstChip FcMpTool`).
-
 ---
 
-## Industrial Workbench GUI & Multi-Language Support
+## Industrial Workbench GUI & Dispute Certificate
 
 FlashTruth embeds a zero-dependency **Swiss-Industrial Hardware Workbench GUI** (`internal/server/ui/index.html`) served locally via `--gui`:
-- **Strict Single-Language Isolation:** Defaults to pure **English (`EN`)** with full localization across **6 languages** (`EN`, `AR`, `FR`, `ES`, `DE`, `ZH`) and automatic `LTR` / `RTL` layout switching.
+- **Pure English Technical Interface:** Engineered with clean, high-density English-only (`EN`) hardware telemetry and diagnostic reporting.
 - **Dual Precision Themes:** `Obsidian Lab` (dark high-contrast telemetry) and `Cleanroom Paper` (light print/daylight mode).
 - **Interactive LBA Wafer Map:** Visualizes every 4KB DMA probe point with live hover inspection of physical LBA, byte offset, written cryptographic tag, hardware readback hex, `K=0` canary integrity, and I/O latency.
 - **One-Click Buyer Protection Certificate:** Exports a standalone, print-ready HTML/PDF Forensic Certificate (`--html`) and machine-readable JSON audit log (`--json`) for e-commerce refund disputes.

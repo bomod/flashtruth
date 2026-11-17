@@ -61,7 +61,6 @@
     "category": "KNOWN_FAKE_TEMPLATE",
     "risk_level": "CRITICAL",
     "common_mptools": "FirstChip FcMpTool / Chipsbank UMPTool / APtool",
-    "description_ar": "المعرف 048D:1234 هو أشهر قالب افتراضي للمتحكمات الصينية الرخيصة (FirstChip / Chipsbank) المستخدمة في الفلاشات المزورة التي تنتحل سعات 1TB و2TB وأسماء مثل Flash Disk 3.0 أو VendorCo ProductCode.",
     "description_en": "VID 048D / PID 1234 is the single most notorious default factory template for cheap Chinese controllers (FirstChip FC1178/FC1179 \u0026 Chipsbank CBM2199) used in fake-capacity 1TB/2TB flash drives."
   },
   "boot_forensics": {
@@ -235,7 +234,6 @@
       {
         "severity": "INFO",
         "path": "D:\\",
-        "reason_ar": "الفلاش نظيف تماماً من البرمجيات الخبيثة، الديدان، ملفات autorun.inf، والملفات التنفيذية المشبوهة.",
         "reason_en": "Drive is completely clean of malware, shortcut worms, autorun.inf, and suspicious executables."
       }
     ],
@@ -919,7 +917,6 @@
   "trust": {
     "score": 0,
     "grade": "F // COUNTERFEIT",
-    "verdict_ar": "فلاش مُزوَّر السعة والتصنيف — السعة الفيزيائية الحقيقية جزء ضئيل من السعة المعلنة (خطر تلف البيانات)",
     "verdict_en": "COUNTERFEIT STORAGE MEDIA — Physical NAND capacity is a fraction of advertised LBA count (High Data Loss Risk)",
     "is_authentic": false,
     "evidence": [
@@ -927,9 +924,7 @@
         "category": "PHYSICAL_CAPACITY",
         "status": "FAIL",
         "impact": -65,
-        "title_ar": "تزوير السعة الفيزيائية (Fake Flash Capacity)",
         "title_en": "Counterfeit Physical NAND Capacity Detected",
-        "detail_ar": "الفلاش يدّعي سعة 1953.12 GiB (2.10 TB)، بينما الفحص العتادي المباشر بالبحث الثنائي أثبت أن السعة الحقيقية هي 29.815 GiB (32.01 GB) فقط! نسبة السعة الوهمية 98.47%.",
         "detail_en": "Drive claims 1953.12 GiB (2.10 TB), but hardware binary search proved true physical capacity is only 29.815 GiB (32.01 GB). 98.47% of reported space is phantom void (BLACK_HOLE_0xFF).",
         "raw_proof": "LastValid4KPage=0x7742EF (Sector 62527359 = 32014008320 bytes) | FirstInvalid4KPage=0x7742F0 -\u003e Read=0xFFFFFFFFFFFFFFFF"
       },
@@ -937,9 +932,7 @@
         "category": "CONTROLLER_IDENTITY",
         "status": "FAIL",
         "impact": -25,
-        "title_ar": "متحكم صيني مقلد معروف (Known MPtool Fake Template)",
         "title_en": "Known Counterfeit MPtool Controller Signature",
-        "detail_ar": "المعرف 048D:1234 هو أشهر قالب افتراضي للمتحكمات الصينية الرخيصة (FirstChip / Chipsbank) المستخدمة في الفلاشات المزورة التي تنتحل سعات 1TB و2TB وأسماء مثل Flash Disk 3.0 أو VendorCo ProductCode.",
         "detail_en": "VID 048D / PID 1234 is the single most notorious default factory template for cheap Chinese controllers (FirstChip FC1178/FC1179 \u0026 Chipsbank CBM2199) used in fake-capacity 1TB/2TB flash drives.",
         "raw_proof": "VID=048D PID=1234 SCSI='Flash Disk 3.0' Rev='2.00'"
       },
@@ -947,9 +940,7 @@
         "category": "USB_GENERATION",
         "status": "FAIL",
         "impact": -15,
-        "title_ar": "تزييف جيل الـ USB (يدّعي USB 3.0 وهو فعلياً USB 2.0)",
         "title_en": "Fake USB 3.0 Marketing Claim (Hardware is USB 2.0)",
-        "detail_ar": "الفلاش يحمل اسم 'Disk 3.0' لإيهام المشتري بأنه USB 3.0، لكنه متصل فيزيائياً عبر خطوط High-Speed USB 2.0 (\\_SB.PC00.XHCI.RHUB.HS08) وبإصدار عتادي REV_0200.",
         "detail_en": "Device advertises 'Disk 3.0' (USB 3.0), but enumerates on USB 2.0 High-Speed bus (\\_SB.PC00.XHCI.RHUB.HS08) with hardware revision REV_0200.",
         "raw_proof": "PNP=USB\\VID_048D\u0026PID_1234\\9112511085014663328 | BIOS=\\_SB.PC00.XHCI.RHUB.HS08 | Rev=0200"
       },
@@ -957,9 +948,7 @@
         "category": "BOOT_FORENSICS",
         "status": "FAIL",
         "impact": -15,
-        "title_ar": "بصمة أداة حقن السعة المصنعية (MPtool LBA-32 \u0026 Synthetic Sectors)",
         "title_en": "Factory Capacity-Spoofing MPtool Partition Fingerprint",
-        "detail_ar": "القسم يبدأ عند القطاع LBA 32 (بدلاً من محاذاة ويندوز القياسية LBA 2048)، وعدد القطاعات الكلي (4096000000) هو رقم دائري اصطناعي من أداة MPtool.",
         "detail_en": "Partition starts at LBA 32 (instead of standard OS LBA 2048 alignment), and total sector count (4096000000) matches a synthetic MPtool round formula.",
         "raw_proof": "PartitionStartLBA=32 | ReadCapacityHex=F423FFFF00000200 | MBRPart1=8001010007FEFFFF20000000E0FF23F4"
       },
@@ -967,9 +956,7 @@
         "category": "NAND_PERFORMANCE",
         "status": "PASS",
         "impact": 0,
-        "title_ar": "سرعة قراءة وكتابة طبيعية (Write: 28.46 MB/s | Read: 31.57 MB/s)",
         "title_en": "Healthy Hardware Read/Write Speed (Write: 28.46 MB/s | Read: 31.57 MB/s)",
-        "detail_ar": "STANDARD: Mainstream TLC NAND (10 - 35 MB/s write speed)",
         "detail_en": "STANDARD: Mainstream TLC NAND (10 - 35 MB/s write speed)",
         "raw_proof": "Write=28.46 MB/s | Read=31.57 MB/s"
       },
@@ -977,9 +964,7 @@
         "category": "SECURITY_MALWARE",
         "status": "PASS",
         "impact": 0,
-        "title_ar": "الفلاش نظيف أمنياً وخالٍ من الفيروسات والملفات المخفية المشبوهة",
         "title_en": "Drive is Clean of Malware, Worms, and Suspicious Hidden Files",
-        "detail_ar": "لم يتم العثور على أي برمجيات خبيثة أو ملفات autorun.inf أو اختصارات .lnk أو ملفات محذوفة مسبقاً في العنقود الجذري.",
         "detail_en": "Zero malware, autorun.inf, .lnk worms, or prior deleted files found in raw root directory cluster.",
         "raw_proof": "TotalFiles=3 | Suspicious=0 | PriorDeleted=3"
       }

@@ -15,7 +15,6 @@ type VendorRecord struct {
 	Category         string
 	RiskLevel        string
 	CommonMPtools    string
-	DescriptionAR    string
 	DescriptionEN    string
 }
 
@@ -29,7 +28,6 @@ var knownSignatures = []VendorRecord{
 		Category:         "KNOWN_FAKE_TEMPLATE",
 		RiskLevel:        "CRITICAL",
 		CommonMPtools:    "FirstChip FcMpTool / Chipsbank UMPTool / APtool",
-		DescriptionAR:    "المعرف 048D:1234 هو أشهر قالب افتراضي للمتحكمات الصينية الرخيصة (FirstChip / Chipsbank) المستخدمة في الفلاشات المزورة التي تنتحل سعات 1TB و2TB وأسماء مثل Flash Disk 3.0 أو VendorCo ProductCode.",
 		DescriptionEN:    "VID 048D / PID 1234 is the single most notorious default factory template for cheap Chinese controllers (FirstChip FC1178/FC1179 & Chipsbank CBM2199) used in fake-capacity 1TB/2TB flash drives.",
 	},
 	{
@@ -40,7 +38,6 @@ var knownSignatures = []VendorRecord{
 		Category:         "KNOWN_FAKE_TEMPLATE",
 		RiskLevel:        "HIGH",
 		CommonMPtools:    "FirstChip FcMpTool",
-		DescriptionAR:    "متحكم FirstChip FC1178 صيني منخفض التكلفة، يُستخدم بكثرة في الفلاشات بدون علامة تجارية والفلاشات المعدلة برمجياً لتضخيم السعة.",
 		DescriptionEN:    "FirstChip FC1178 budget controller frequently used in white-label and capacity-spoofed USB flash drives.",
 	},
 	{
@@ -51,7 +48,6 @@ var knownSignatures = []VendorRecord{
 		Category:         "KNOWN_FAKE_TEMPLATE",
 		RiskLevel:        "HIGH",
 		CommonMPtools:    "FirstChip FcMpTool",
-		DescriptionAR:    "متحكم FirstChip FC1179 صيني منخفض التكلفة، شائع جداً في الفلاشات المقلدة ذات السعات الوهمية.",
 		DescriptionEN:    "FirstChip FC1179 budget controller widely used in counterfeit high-capacity USB drives.",
 	},
 	{
@@ -62,7 +58,6 @@ var knownSignatures = []VendorRecord{
 		Category:         "KNOWN_FAKE_TEMPLATE",
 		RiskLevel:        "CRITICAL",
 		CommonMPtools:    "FirstChip MpTool / DiskGenius",
-		DescriptionAR:    "معرف مصنع غير قانوني (FFFF:5678) غير مسجل في منظمة USB-IF، يُستخدم حصرياً في الفلاشات الصينية المقلدة.",
 		DescriptionEN:    "Illegal/unassigned USB-IF Vendor ID (FFFF:5678) used exclusively in counterfeit mass-production flash drives.",
 	},
 	{
@@ -73,7 +68,6 @@ var knownSignatures = []VendorRecord{
 		Category:         "KNOWN_FAKE_TEMPLATE",
 		RiskLevel:        "CRITICAL",
 		CommonMPtools:    "Generic MPtool",
-		DescriptionAR:    "معرف مصنع غير قانوني (FFFF:1201) يدل على متحكم صيني مقلد بدون ترخيص USB-IF.",
 		DescriptionEN:    "Illegal/unassigned USB-IF Vendor ID (FFFF:1201) indicating an unlicensed generic controller.",
 	},
 	{
@@ -84,7 +78,6 @@ var knownSignatures = []VendorRecord{
 		Category:         "KNOWN_FAKE_TEMPLATE",
 		RiskLevel:        "HIGH",
 		CommonMPtools:    "Chipsbank APTool / UMPTool",
-		DescriptionAR:    "متحكم Chipsbank صيني رخيص يُبرمج غالباً بأداة UMPTool لتغيير السعة الظاهرية.",
 		DescriptionEN:    "Chipsbank budget controller commonly flashed with UMPTool/APTool to spoof storage capacity.",
 	},
 	{
@@ -95,7 +88,6 @@ var knownSignatures = []VendorRecord{
 		Category:         "KNOWN_FAKE_TEMPLATE",
 		RiskLevel:        "CRITICAL",
 		CommonMPtools:    "Ameco / Micov UdTools",
-		DescriptionAR:    "متحكم Micov MW8209/MXT6208 شهير في الفلاشات المزورة التي تُعيد تدوير شرائح NAND التالفة.",
 		DescriptionEN:    "Micov MW8209/MXT6208 controller notorious for counterfeit drives using downgraded/scrap NAND.",
 	},
 	{
@@ -106,7 +98,6 @@ var knownSignatures = []VendorRecord{
 		Category:         "KNOWN_FAKE_TEMPLATE",
 		RiskLevel:        "HIGH",
 		CommonMPtools:    "AlcorMP",
-		DescriptionAR:    "متحكم Alcor Micro مبرمج بالمعرف الافتراضي 1234 عبر أداة AlcorMP، يُستخدم غالباً في الفلاشات المُعاد برمجتها أو المزورة.",
 		DescriptionEN:    "Alcor Micro controller with factory-default PID 1234 flashed via AlcorMP, frequently seen in reprogrammed or fake drives.",
 	},
 
@@ -119,7 +110,6 @@ var knownSignatures = []VendorRecord{
 		Category:         "AUTHENTIC_BRAND",
 		RiskLevel:        "LOW",
 		CommonMPtools:    "Proprietary Factory Locked",
-		DescriptionAR:    "معرف SanDisk الرسمي المسجل في منظمة USB-IF.",
 		DescriptionEN:    "Official USB-IF Vendor ID registered to SanDisk Corp. (Western Digital).",
 	},
 	{
@@ -130,7 +120,6 @@ var knownSignatures = []VendorRecord{
 		Category:         "AUTHENTIC_BRAND",
 		RiskLevel:        "LOW",
 		CommonMPtools:    "OEM Locked",
-		DescriptionAR:    "معرف Kingston الرسمي المسجل في منظمة USB-IF.",
 		DescriptionEN:    "Official USB-IF Vendor ID registered to Kingston Technology.",
 	},
 	{
@@ -141,7 +130,6 @@ var knownSignatures = []VendorRecord{
 		Category:         "AUTHENTIC_BRAND",
 		RiskLevel:        "LOW",
 		CommonMPtools:    "Samsung Magician / Proprietary",
-		DescriptionAR:    "معرف Samsung Electronics الرسمي المسجل في منظمة USB-IF.",
 		DescriptionEN:    "Official USB-IF Vendor ID registered to Samsung Electronics.",
 	},
 	{
@@ -152,7 +140,6 @@ var knownSignatures = []VendorRecord{
 		Category:         "AUTHENTIC_BRAND",
 		RiskLevel:        "LOW",
 		CommonMPtools:    "OEM Locked",
-		DescriptionAR:    "معرف Toshiba / Kioxia الرسمي المسجل في منظمة USB-IF.",
 		DescriptionEN:    "Official USB-IF Vendor ID registered to Toshiba / Kioxia.",
 	},
 	{
@@ -163,7 +150,6 @@ var knownSignatures = []VendorRecord{
 		Category:         "AUTHENTIC_BRAND",
 		RiskLevel:        "LOW",
 		CommonMPtools:    "OEM Locked",
-		DescriptionAR:    "معرف Lexar Media الرسمي المسجل في منظمة USB-IF.",
 		DescriptionEN:    "Official USB-IF Vendor ID registered to Lexar Media.",
 	},
 	{
@@ -174,7 +160,6 @@ var knownSignatures = []VendorRecord{
 		Category:         "AUTHENTIC_BRAND",
 		RiskLevel:        "LOW",
 		CommonMPtools:    "Transcend JetFlash Recovery",
-		DescriptionAR:    "معرف Transcend الرسمي المسجل في منظمة USB-IF.",
 		DescriptionEN:    "Official USB-IF Vendor ID registered to Transcend Information.",
 	},
 	{
@@ -185,7 +170,6 @@ var knownSignatures = []VendorRecord{
 		Category:         "AUTHENTIC_BRAND",
 		RiskLevel:        "LOW",
 		CommonMPtools:    "OEM Locked",
-		DescriptionAR:    "معرف ADATA الرسمي المسجل في منظمة USB-IF.",
 		DescriptionEN:    "Official USB-IF Vendor ID registered to ADATA Technology.",
 	},
 	{
@@ -196,7 +180,6 @@ var knownSignatures = []VendorRecord{
 		Category:         "GENERIC_CONTROLLER",
 		RiskLevel:        "MEDIUM",
 		CommonMPtools:    "SMI Mass Production Tool (SMIMPTool)",
-		DescriptionAR:    "متحكم Silicon Motion التايواني؛ يُستخدم في فلاشات أصلية، ولكنه يُستخدم أيضاً في فلاشات مقلدة إذا كان يحمل اسم VendorCo ProductCode.",
 		DescriptionEN:    "Silicon Motion (SMI) controller; used in legitimate OEM drives, but also abused in counterfeit drives when paired with 'VendorCo ProductCode' strings.",
 	},
 	{
@@ -207,7 +190,6 @@ var knownSignatures = []VendorRecord{
 		Category:         "GENERIC_CONTROLLER",
 		RiskLevel:        "MEDIUM",
 		CommonMPtools:    "Phison MPALL",
-		DescriptionAR:    "متحكم Phison التايواني؛ شائع في الفلاشات التجارية ويُعاد تهيئته عبر أداة Phison MPALL.",
 		DescriptionEN:    "Phison Electronics controller; common in commercial drives, programmable via Phison MPALL.",
 	},
 
@@ -220,7 +202,6 @@ var knownSignatures = []VendorRecord{
 		Category:         "AUTHENTIC_BRAND",
 		RiskLevel:        "LOW",
 		CommonMPtools:    "WD Drive Utilities / Factory Locked",
-		DescriptionAR:    "معرف Western Digital الرسمي للأقراص الصلبة الخارجية (HDD) وأقراص SSD المحمولة.",
 		DescriptionEN:    "Official Western Digital USB Vendor ID for external HDDs and portable SSDs.",
 	},
 	{
@@ -231,7 +212,6 @@ var knownSignatures = []VendorRecord{
 		Category:         "AUTHENTIC_BRAND",
 		RiskLevel:        "LOW",
 		CommonMPtools:    "Seagate SeaTools / Factory Locked",
-		DescriptionAR:    "معرف Seagate Technology الرسمي للأقراص الصلبة الخارجية وأقراص SSD.",
 		DescriptionEN:    "Official Seagate Technology USB Vendor ID for external HDD and SSD enclosures.",
 	},
 	{
@@ -242,7 +222,6 @@ var knownSignatures = []VendorRecord{
 		Category:         "AUTHENTIC_BRAND",
 		RiskLevel:        "LOW",
 		CommonMPtools:    "Factory Locked",
-		DescriptionAR:    "معرف Toshiba الرسمي للأقراص الصلبة الخارجية (Canvio Series).",
 		DescriptionEN:    "Official Toshiba USB Vendor ID for external portable hard drives (Canvio Series).",
 	},
 	{
@@ -253,7 +232,6 @@ var knownSignatures = []VendorRecord{
 		Category:         "GENERIC_CONTROLLER",
 		RiskLevel:        "MEDIUM",
 		CommonMPtools:    "JMicronReadWriteFp /FwUpdater",
-		DescriptionAR:    "جسر تحويل JMicron USB-to-SATA/NVMe؛ يُستخدم في حاويات الأقراص الخارجية الأصلية ولكنه يُستغل أيضاً في أقراص SSD الخارجية المزيفة.",
 		DescriptionEN:    "JMicron USB-to-SATA/NVMe bridge controller; widely used in legitimate external enclosures, but also found in counterfeit portable SSDs.",
 	},
 	{
@@ -264,7 +242,6 @@ var knownSignatures = []VendorRecord{
 		Category:         "GENERIC_CONTROLLER",
 		RiskLevel:        "LOW",
 		CommonMPtools:    "ASMedia MPTool",
-		DescriptionAR:    "جسر تحويل ASMedia عالي الأداء (SATA/NVMe إلى USB 3.2/USB4).",
 		DescriptionEN:    "High-performance ASMedia USB 3.2/USB4 to SATA/NVMe bridge controller.",
 	},
 	{
@@ -275,7 +252,6 @@ var knownSignatures = []VendorRecord{
 		Category:         "GENERIC_CONTROLLER",
 		RiskLevel:        "LOW",
 		CommonMPtools:    "Realtek UTHS / DumpTool",
-		DescriptionAR:    "شريحة جسر أو قارئ بطاقات من شركة Realtek التايوانية (RTL9210 NVMe/SATA أو قارئ SD).",
 		DescriptionEN:    "Realtek Semiconductor USB-to-NVMe/SATA bridge (RTL9210) or SD/MMC card reader controller.",
 	},
 	{
@@ -286,7 +262,6 @@ var knownSignatures = []VendorRecord{
 		Category:         "KNOWN_FAKE_TEMPLATE",
 		RiskLevel:        "HIGH",
 		CommonMPtools:    "Norelsys MPTool",
-		DescriptionAR:    "جسر Norelsys الصيني الرخيص؛ شائع جداً في أقراص SSD الخارجية المزيفة التي بداخلها بطاقة microSD أو فلاش رخيص.",
 		DescriptionEN:    "Norelsys budget USB-to-SATA bridge frequently found inside counterfeit portable external SSDs.",
 	},
 }
@@ -323,7 +298,6 @@ func LookupController(vid, pid, scsiVendor, scsiProduct string) model.Controller
 			for _, susp := range suspiciousSCStrings(combinedSCSI) {
 				sig.Category = "KNOWN_FAKE_TEMPLATE"
 				sig.RiskLevel = "CRITICAL"
-				sig.DescriptionAR += fmt.Sprintf(" (تنبيه: يحتوي نص الاستعلام على البصمة المشبوهة '%s' الخاصة بأدوات التزوير).", susp)
 				sig.DescriptionEN += fmt.Sprintf(" (Alert: SCSI string contains suspicious MPtool placeholder '%s').", susp)
 				break
 			}
@@ -341,7 +315,6 @@ func LookupController(vid, pid, scsiVendor, scsiProduct string) model.Controller
 			Category:         "KNOWN_FAKE_TEMPLATE",
 			RiskLevel:        "HIGH",
 			CommonMPtools:    "FirstChip / Chipsbank / SMI MPtool",
-			DescriptionAR:    fmt.Sprintf("متحكم يحمل نص استعلام مصنعي عام ('%s') شائع الاستخدام في الفلاشات المقلدة.", scsiVendor+" "+scsiProduct),
 			DescriptionEN:    fmt.Sprintf("Controller carries generic factory placeholder string ('%s') common in counterfeit drives.", scsiVendor+" "+scsiProduct),
 		}
 	}
@@ -354,7 +327,6 @@ func LookupController(vid, pid, scsiVendor, scsiProduct string) model.Controller
 		Category:         "UNKNOWN",
 		RiskLevel:        "MEDIUM",
 		CommonMPtools:    "Unknown",
-		DescriptionAR:    "معرف غير مدرج في قائمة القوالب المزورة الشهيرة؛ يعتمد الحكم النهائي على فحص السعة الفيزيائية بالبحث الثنائي.",
 		DescriptionEN:    "Identifier not in known fake template list; final verdict depends on physical binary-search capacity test.",
 	}
 }
@@ -378,7 +350,6 @@ func toModel(r VendorRecord, vid, pid string) model.ControllerSignature {
 		Category:         r.Category,
 		RiskLevel:        r.RiskLevel,
 		CommonMPtools:    r.CommonMPtools,
-		DescriptionAR:    r.DescriptionAR,
 		DescriptionEN:    r.DescriptionEN,
 	}
 }

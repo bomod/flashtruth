@@ -73,7 +73,6 @@
     "category": "KNOWN_FAKE_TEMPLATE",
     "risk_level": "CRITICAL",
     "common_mptools": "FirstChip FcMpTool / Chipsbank UMPTool / APtool",
-    "description_ar": "المعرف 048D:1234 هو أشهر قالب افتراضي للمتحكمات الصينية الرخيصة (FirstChip / Chipsbank) المستخدمة في الفلاشات المزورة التي تنتحل سعات 1TB و2TB وأسماء مثل Flash Disk 3.0 أو VendorCo ProductCode.",
     "description_en": "VID 048D / PID 1234 is the single most notorious default factory template for cheap Chinese controllers (FirstChip FC1178/FC1179 \u0026 Chipsbank CBM2199) used in fake-capacity 1TB/2TB flash drives."
   },
   "boot_forensics": {
@@ -157,7 +156,6 @@
       {
         "severity": "INFO",
         "path": "E:\\",
-        "reason_ar": "الفلاش نظيف تماماً من البرمجيات الخبيثة، الديدان، ملفات autorun.inf، والملفات التنفيذية المشبوهة.",
         "reason_en": "Drive is completely clean of malware, shortcut worms, autorun.inf, and suspicious executables."
       }
     ],
@@ -753,7 +751,6 @@
   "trust": {
     "score": 0,
     "grade": "F // COUNTERFEIT",
-    "verdict_ar": "فلاش مُزوَّر السعة والتصنيف — السعة الفيزيائية الحقيقية جزء ضئيل من السعة المعلنة (خطر تلف البيانات)",
     "verdict_en": "COUNTERFEIT STORAGE MEDIA — Physical NAND capacity is a fraction of advertised LBA count (High Data Loss Risk)",
     "is_authentic": false,
     "evidence": [
@@ -761,9 +758,7 @@
         "category": "PHYSICAL_CAPACITY",
         "status": "FAIL",
         "impact": -65,
-        "title_ar": "تزوير السعة الفيزيائية (Fake Flash Capacity)",
         "title_en": "Counterfeit Physical NAND Capacity Detected",
-        "detail_ar": "الفلاش يدّعي سعة 500.98 GiB (0.54 TB)، بينما الفحص العتادي المباشر بالبحث الثنائي أثبت أن السعة الحقيقية هي 58.495 GiB (62.81 GB) فقط! نسبة السعة الوهمية 88.32%.",
         "detail_en": "Drive claims 500.98 GiB (0.54 TB), but hardware binary search proved true physical capacity is only 58.495 GiB (62.81 GB). 88.32% of reported space is phantom void (BLACK_HOLE_0xFF).",
         "raw_proof": "LastValid4KPage=0xE9FAFF (Sector 122673151 = 62808653824 bytes) | FirstInvalid4KPage=0xE9FB00 -\u003e Read=0xFFFFFFFFFFFFFFFF"
       },
@@ -771,9 +766,7 @@
         "category": "CONTROLLER_IDENTITY",
         "status": "FAIL",
         "impact": -25,
-        "title_ar": "متحكم صيني مقلد معروف (Known MPtool Fake Template)",
         "title_en": "Known Counterfeit MPtool Controller Signature",
-        "detail_ar": "المعرف 048D:1234 هو أشهر قالب افتراضي للمتحكمات الصينية الرخيصة (FirstChip / Chipsbank) المستخدمة في الفلاشات المزورة التي تنتحل سعات 1TB و2TB وأسماء مثل Flash Disk 3.0 أو VendorCo ProductCode.",
         "detail_en": "VID 048D / PID 1234 is the single most notorious default factory template for cheap Chinese controllers (FirstChip FC1178/FC1179 \u0026 Chipsbank CBM2199) used in fake-capacity 1TB/2TB flash drives.",
         "raw_proof": "VID=048D PID=1234 SCSI='VendorCo ProductCode' Rev='2.00'"
       },
@@ -781,9 +774,7 @@
         "category": "BOOT_FORENSICS",
         "status": "FAIL",
         "impact": -15,
-        "title_ar": "بصمة أداة حقن السعة المصنعية (MPtool LBA-32 \u0026 Synthetic Sectors)",
         "title_en": "Factory Capacity-Spoofing MPtool Partition Fingerprint",
-        "detail_ar": "القسم يبدأ عند القطاع LBA 64 (بدلاً من محاذاة ويندوز القياسية LBA 2048)، وعدد القطاعات الكلي (1050623936) هو رقم دائري اصطناعي من أداة MPtool.",
         "detail_en": "Partition starts at LBA 64 (instead of standard OS LBA 2048 alignment), and total sector count (1050623936) matches a synthetic MPtool round formula.",
         "raw_proof": "PartitionStartLBA=64 | ReadCapacityHex=3E9F3FFF00000200 | MBRPart1=8001010007FEFFFF40000000C03F9F3E"
       },
@@ -791,9 +782,7 @@
         "category": "NAND_PERFORMANCE",
         "status": "PASS",
         "impact": 0,
-        "title_ar": "سرعة قراءة وكتابة طبيعية (Write: 5.18 MB/s | Read: 23.26 MB/s)",
         "title_en": "Healthy Hardware Read/Write Speed (Write: 5.18 MB/s | Read: 23.26 MB/s)",
-        "detail_ar": "LOW: Budget USB 2.0 Planar NAND (\u003c 10 MB/s write speed)",
         "detail_en": "LOW: Budget USB 2.0 Planar NAND (\u003c 10 MB/s write speed)",
         "raw_proof": "Write=5.18 MB/s | Read=23.26 MB/s"
       },
@@ -801,9 +790,7 @@
         "category": "SECURITY_MALWARE",
         "status": "PASS",
         "impact": 0,
-        "title_ar": "الفلاش نظيف أمنياً وخالٍ من الفيروسات والملفات المخفية المشبوهة",
         "title_en": "Drive is Clean of Malware, Worms, and Suspicious Hidden Files",
-        "detail_ar": "لم يتم العثور على أي برمجيات خبيثة أو ملفات autorun.inf أو اختصارات .lnk أو ملفات محذوفة مسبقاً في العنقود الجذري.",
         "detail_en": "Zero malware, autorun.inf, .lnk worms, or prior deleted files found in raw root directory cluster.",
         "raw_proof": "TotalFiles=3 | Suspicious=0 | PriorDeleted=0"
       }

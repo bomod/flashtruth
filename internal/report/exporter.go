@@ -113,12 +113,9 @@ func SaveJSON(r *model.AuditReport, path string) error {
 	return os.WriteFile(path, b, 0644)
 }
 
-// RenderCertificateHTML generates a standalone Swiss-Grid Hardware Forensics Certificate strictly in the requested language (default "en") with zero language mixing.
+// RenderCertificateHTML generates a standalone Swiss-Grid Hardware Forensics Certificate in English.
 func RenderCertificateHTML(r *model.AuditReport, lang ...string) string {
 	selectedLang := "en"
-	if len(lang) > 0 && strings.ToLower(strings.TrimSpace(lang[0])) == "ar" {
-		selectedLang = "ar"
-	}
 
 	accent := "#10b981"
 	statusBg := "#ecfdf5"
@@ -129,15 +126,9 @@ func RenderCertificateHTML(r *model.AuditReport, lang ...string) string {
 		statusText = "#9f1239"
 	}
 
-	isAR := selectedLang == "ar"
 	dir := "ltr"
 	align := "left"
 	borderSide := "border-left"
-	if isAR {
-		dir = "rtl"
-		align = "right"
-		borderSide = "border-right"
-	}
 
 	var evidenceRows strings.Builder
 	for _, e := range r.Trust.Evidence {
@@ -152,10 +143,6 @@ func RenderCertificateHTML(r *model.AuditReport, lang ...string) string {
 		}
 		title := e.TitleEN
 		detail := e.DetailEN
-		if isAR {
-			title = e.TitleAR
-			detail = e.DetailAR
-		}
 		evidenceRows.WriteString(fmt.Sprintf(`
 		<tr>
 			<td><span class="pill" style="background:%s;color:%s;">%s (%d)</span></td>
@@ -176,20 +163,6 @@ func RenderCertificateHTML(r *model.AuditReport, lang ...string) string {
 	thAnalysis := "Technical Determination"
 	thProof := "Raw Hardware Proof"
 	verdictText := r.Trust.VerdictEN
-
-	if isAR {
-		docTitle = "شهادة الفحص الجنائي والتحقق العتادي من سعة القرص"
-		secHeader = "الأدلة الجنائية والقياسات العتادية المباشرة"
-		lblReported = "السعة المعلنة للنظام"
-		lblTrue = "سعة الـ NAND الفيزيائية الحقيقية"
-		lblPhantom = "نسبة السعة الوهمية المزيفة"
-		lblHw = "هوية العتاد وسرعة النقل"
-		thStatus = "الحالة"
-		thVector = "محور الفحص"
-		thAnalysis = "التحليل الفني"
-		thProof = "الدليل العتادي الخام"
-		verdictText = r.Trust.VerdictAR
-	}
 
 	return fmt.Sprintf(`<!DOCTYPE html>
 <html lang="%s" dir="%s">

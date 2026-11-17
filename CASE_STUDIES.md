@@ -7,7 +7,7 @@
 
 ---
 
-## 1. Executive Summary (ملخص تنفيذي)
+## 1. Executive Summary
 
 Counterfeit storage devices sold across global e-commerce marketplaces no longer rely on simple software tricks—they reprogram the internal **microcontroller firmware (`MPtool`)** of low-cost USB flash chips so that the operating system kernel (`Windows Disk Management`, `macOS Disk Utility`, `Linux lsblk`) genuinely believes the device holds `500 GB`, `1 TB`, or `2 TB`.
 
@@ -148,16 +148,3 @@ Instead of throwing away counterfeit drives, **FlashTruth** includes a hardware 
 1. **Case Study #1 (`D:` — 2 TB Fake -> `28.59 GiB` Safe):** Successfully clamped to `28.59 GiB` (`30,702,305,280` bytes), quarantining `1.92 TB` of phantom LBA space as unallocated, formatted as `FAT32`, and verified by flashing and booting a complete **Linux Mint 22.3 Cinnamon (64-bit)** live OS image with `SHA-256` verification and `85 / 100 [A // REPAIRED & SAFE]` trust rating.
 2. **Case Study #2 (`E:` — 500 GB Fake SSD -> `56.73 GiB` Safe):** Can be safely clamped to `56.73 GiB` (`58,096 MB` / `60.91 GB`), quarantining the remaining `444.25 GiB` phantom region.
 
----
-
-## 5. الملخص باللغة العربية (Arabic Summary of Findings)
-
-تُثبت هاتان التجربتان العمليتان كفاءة محرك **FlashTruth** في كشف أحدث أساليب الغش التجاري في وسائط التخزين خلال أقل من ثانية واحدة:
-1. **التجربة الأولى (`FT-0EA813AE7334` — فلاشة تدّعي سعة `2 TB` وواجهة `USB 3.0`):**
-   - كشف البرنامج في **`1.19` ثانية** أن السعة الفيزيائية الحقيقية هي **`29.815 GiB` (`32.01 GB`)** فقط وأن **`98.47%`** من السعة وهمية (`BLACK_HOLE_0xFF`)، وأنها تعمل بمتحكم صيني مقلد (`FirstChip FC1178/FC1179` — `VID_048D&PID_1234`) على منفذ `USB 2.0` فقط.
-   - نجح البرنامج في إصلاحها عتادياً وعزل المساحة الوهمية وتثبيت نظام `Linux Mint 22.3` القابل للإقلاع عليها بنجاح.
-2. **التجربة الثانية (`FT-6251FDAB06FD` — هارد ديسك خارجي يدّعي أنه `500 GB SSD`):**
-   - كشف البرنامج في **`0.70` ثانية** أن القرص **ليس SSD على الإطلاق**، بل هو فلاشة `USB 2.0` رخيصة (`Removable Flash`, `VID_048D&PID_1234`, `VendorCo ProductCode`) مخبأة داخل علبة هارد خارجي!
-   - السعة الحقيقية لشريحة الفلاش بالداخل هي **`58.495 GiB` (`62.81 GB`)** فقط، بينما **`88.32%`** (`442.49 GiB`) هي مساحة وهمية تبتلع الملفات وتتلفها فور تجاوز حاجز `58.49 GiB`، وسرعة الكتابة الحقيقية لا تتجاوز **`5.18 MB/s`**.
-3. **الدليل الجنائي القاطع على وحدة المصدر المصنعي للغش:**
-   - أثبت الفحص الجنائي لقطاعات الإقلاع (`MBR` و`VBR`) أن كلاً من "فلاشة الـ 2 تيرابايت" و"هارد الـ 500 جيجابايت SSD" يحملان **نفس البصمة السداسية المبرمجة مصنعياً** (`MBR Signature = 33B82CFA` و`Volume Serial = 76E8CACF` و`VID:PID = 048D:1234`)، مما يثبت أنهما خرجا من نفس أداة التزوير المصنعية (`FirstChip FcMpTool`).

@@ -100,7 +100,6 @@ type ControllerSignature struct {
 	Category            string `json:"category"` // "AUTHENTIC_BRAND", "KNOWN_FAKE_TEMPLATE", "GENERIC_CONTROLLER", "UNKNOWN"
 	RiskLevel           string `json:"risk_level"` // "LOW", "MEDIUM", "HIGH", "CRITICAL"
 	CommonMPtools       string `json:"common_mptools"`
-	DescriptionAR       string `json:"description_ar"`
 	DescriptionEN       string `json:"description_en"`
 }
 
@@ -149,7 +148,6 @@ type MalwareScanResult struct {
 type SecurityFinding struct {
 	Severity    string `json:"severity"` // "INFO", "WARNING", "CRITICAL"
 	Path        string `json:"path"`
-	ReasonAR    string `json:"reason_ar"`
 	ReasonEN    string `json:"reason_en"`
 }
 
@@ -238,7 +236,6 @@ type SafeRepairPlan struct {
 type TrustScorecard struct {
 	Score       int            `json:"score"`       // 0 - 100
 	Grade       string         `json:"grade"`       // A+, A, B, C, D, F (COUNTERFEIT)
-	VerdictAR   string         `json:"verdict_ar"`
 	VerdictEN   string         `json:"verdict_en"`
 	IsAuthentic bool           `json:"is_authentic"`
 	Evidence    []EvidenceItem `json:"evidence"`
@@ -248,9 +245,7 @@ type EvidenceItem struct {
 	Category   string `json:"category"`
 	Status     string `json:"status"` // "PASS", "WARN", "FAIL"
 	Impact     int    `json:"impact"` // Score delta e.g. -60
-	TitleAR    string `json:"title_ar"`
 	TitleEN    string `json:"title_en"`
-	DetailAR   string `json:"detail_ar"`
 	DetailEN   string `json:"detail_en"`
 	RawProof   string `json:"raw_proof"`
 }
