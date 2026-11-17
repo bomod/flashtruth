@@ -1,0 +1,988 @@
+{
+  "report_id": "FT-0EA813AE7334",
+  "generated_at": "2026-11-01T12:20:59.1136424Z",
+  "host_os": "windows",
+  "host_arch": "amd64",
+  "drive": {
+    "device_path": "D:",
+    "raw_volume_path": "\\\\.\\D:",
+    "physical_disk_path": "\\\\.\\PhysicalDrive1",
+    "disk_number": 1,
+    "volume_label": "",
+    "file_system": "exFAT",
+    "volume_serial_number": "76E8CACF",
+    "reported_size_bytes": 2097152000000,
+    "reported_size_gib": 1953.125,
+    "reported_size_gb": 2097.152,
+    "free_space_bytes": 2097083056128,
+    "bytes_per_sector": 512,
+    "allocation_unit_size": 131072,
+    "total_sectors": 4096000000,
+    "partition_style": "MBR",
+    "partition_offset": 16384,
+    "partition_start_lba": 32,
+    "partition_active": true,
+    "is_removable": true
+  },
+  "usb": {
+    "vendor_id": "048D",
+    "product_id": "1234",
+    "revision": "0200",
+    "serial_number": "9112511085014663328",
+    "manufacturer_string": "Flash",
+    "product_string": "Disk 3.0",
+    "pnp_device_id": "USB\\VID_048D\u0026PID_1234\\9112511085014663328",
+    "parent_hub_id": "USB\\ROOT_HUB30\\4\u00263965bd12\u00260\u00260",
+    "bios_device_path": "\\_SB.PC00.XHCI.RHUB.HS08",
+    "negotiated_speed": "High-Speed (USB 2.0 - 480 Mbps Max)",
+    "claimed_usb3_in_name": true,
+    "is_fake_usb3_speed": true,
+    "first_install_time": "2026-11-01 12:11:25"
+  },
+  "scsi": {
+    "supported": true,
+    "inquiry_hex": "008004021F000000466C6173682020204469736B20332E302020202020202020322E3030",
+    "inquiry_ascii": "........Flash   Disk 3.0        2.00",
+    "vendor_id_8": "Flash",
+    "product_id_16": "Disk 3.0",
+    "product_rev_4": "2.00",
+    "read_capacity_hex": "F423FFFF00000200",
+    "reported_last_lba": 4095999999,
+    "reported_total_sectors": 4096000000,
+    "reported_sector_size": 512,
+    "is_synthetic_mptool_round": true,
+    "synthetic_formula_note": "Total sectors (4096000000 = 0xF4240000) is an exact synthetic multiple of 2000000 MiB (20 * 100,000 MiB), a classic FirstChip/Chipsbank MPtool manual capacity entry."
+  },
+  "controller_match": {
+    "vid": "048D",
+    "pid": "1234",
+    "registered_owner": "Integrated Technology Express, Inc. (ITE)",
+    "actual_controller": "FirstChip FC1178BC / FC1179 or Chipsbank CBM2199 (Generic MPtool Template)",
+    "category": "KNOWN_FAKE_TEMPLATE",
+    "risk_level": "CRITICAL",
+    "common_mptools": "FirstChip FcMpTool / Chipsbank UMPTool / APtool",
+    "description_ar": "المعرف 048D:1234 هو أشهر قالب افتراضي للمتحكمات الصينية الرخيصة (FirstChip / Chipsbank) المستخدمة في الفلاشات المزورة التي تنتحل سعات 1TB و2TB وأسماء مثل Flash Disk 3.0 أو VendorCo ProductCode.",
+    "description_en": "VID 048D / PID 1234 is the single most notorious default factory template for cheap Chinese controllers (FirstChip FC1178/FC1179 \u0026 Chipsbank CBM2199) used in fake-capacity 1TB/2TB flash drives."
+  },
+  "boot_forensics": {
+    "inspected": true,
+    "mbr_signature_hex": "33B82CFA",
+    "mbr_bootstrap_hex": "FA33C08ED0BC007C8BF45007501FFBFCBF0006B90001F2A5EA1D060000BEBE07",
+    "mbr_partition_entry1_hex": "8001010007FEFFFF20000000E0FF23F4",
+    "is_mptool_lba32_layout": true,
+    "vbr_oem_name": "EXFAT   ",
+    "vbr_boot_jump_hex": "EB7690",
+    "vbr_volume_length_sectors": 4095999968,
+    "vbr_cluster_size": 131072,
+    "vbr_cluster_count": 15999495,
+    "root_dir_offset_bytes": 68288512,
+    "root_dir_entries": [
+      {
+        "offset": 0,
+        "entry_type": "0x03",
+        "in_use": false,
+        "description": "Empty Volume Label (No Label)",
+        "raw_hex_16": "03000000000000000000000000000000"
+      },
+      {
+        "offset": 32,
+        "entry_type": "0x81",
+        "in_use": true,
+        "description": "Allocation Bitmap (Active)",
+        "raw_hex_16": "81000000000000000000000000000000"
+      },
+      {
+        "offset": 64,
+        "entry_type": "0x82",
+        "in_use": true,
+        "description": "Up-Case Table (Active)",
+        "raw_hex_16": "820000000DD319E60000000000000000"
+      },
+      {
+        "offset": 96,
+        "entry_type": "0x85",
+        "in_use": true,
+        "description": "File/Directory Metadata Entry (Active)",
+        "raw_hex_16": "85033EB1160000006D61615D6D61615D"
+      },
+      {
+        "offset": 128,
+        "entry_type": "0xC0",
+        "in_use": true,
+        "description": "Stream Extension Entry (Active)",
+        "raw_hex_16": "C0030019B8FF00000000020000000000"
+      },
+      {
+        "offset": 160,
+        "entry_type": "0xC1",
+        "in_use": true,
+        "description": "File Name Segment (Active)",
+        "decoded_name": "System Volume I",
+        "raw_hex_16": "C100530079007300740065006D002000"
+      },
+      {
+        "offset": 192,
+        "entry_type": "0xC1",
+        "in_use": true,
+        "description": "File Name Segment (Active)",
+        "decoded_name": "nformation",
+        "raw_hex_16": "C1006E0066006F0072006D0061007400"
+      },
+      {
+        "offset": 224,
+        "entry_type": "0x05",
+        "in_use": false,
+        "description": "File/Directory Metadata Entry (Deleted)",
+        "raw_hex_16": "0503B4E620000000CA61615DCC61615D"
+      },
+      {
+        "offset": 256,
+        "entry_type": "0x40",
+        "in_use": false,
+        "description": "Stream Extension Entry (Deleted)",
+        "raw_hex_16": "4003001B806700000000000100000000"
+      },
+      {
+        "offset": 288,
+        "entry_type": "0x41",
+        "in_use": false,
+        "description": "File Name Segment (Deleted)",
+        "decoded_name": "_antigravity_pr",
+        "raw_hex_16": "41005F0061006E007400690067007200"
+      },
+      {
+        "offset": 320,
+        "entry_type": "0x41",
+        "in_use": false,
+        "description": "File Name Segment (Deleted)",
+        "decoded_name": "obe_test.bin",
+        "raw_hex_16": "41006F00620065005F00740065007300"
+      },
+      {
+        "offset": 352,
+        "entry_type": "0x05",
+        "in_use": false,
+        "description": "File/Directory Metadata Entry (Deleted)",
+        "raw_hex_16": "050341B820000000D961615DE461615D"
+      },
+      {
+        "offset": 384,
+        "entry_type": "0x40",
+        "in_use": false,
+        "description": "Stream Extension Entry (Deleted)",
+        "raw_hex_16": "400300175E1B00000000000200000000"
+      },
+      {
+        "offset": 416,
+        "entry_type": "0x41",
+        "in_use": false,
+        "description": "File Name Segment (Deleted)",
+        "decoded_name": "_hw_unbuffered_",
+        "raw_hex_16": "41005F00680077005F0075006E006200"
+      },
+      {
+        "offset": 448,
+        "entry_type": "0x41",
+        "in_use": false,
+        "description": "File Name Segment (Deleted)",
+        "decoded_name": "test.bin",
+        "raw_hex_16": "410074006500730074002E0062006900"
+      },
+      {
+        "offset": 480,
+        "entry_type": "0x05",
+        "in_use": false,
+        "description": "File/Directory Metadata Entry (Deleted)",
+        "raw_hex_16": "0503414B20000000FC61615DFD61615D"
+      },
+      {
+        "offset": 512,
+        "entry_type": "0x40",
+        "in_use": false,
+        "description": "Stream Extension Entry (Deleted)",
+        "raw_hex_16": "40030010776F00000000004000000000"
+      },
+      {
+        "offset": 544,
+        "entry_type": "0x41",
+        "in_use": false,
+        "description": "File Name Segment (Deleted)",
+        "decoded_name": "_spacer_test.tm",
+        "raw_hex_16": "41005F00730070006100630065007200"
+      },
+      {
+        "offset": 576,
+        "entry_type": "0x41",
+        "in_use": false,
+        "description": "File Name Segment (Deleted)",
+        "decoded_name": "p",
+        "raw_hex_16": "41007000000000000000000000000000"
+      }
+    ],
+    "prior_deleted_files_count": 3
+  },
+  "security_scan": {
+    "scanned": true,
+    "total_files": 3,
+    "hidden_files_count": 3,
+    "system_files_count": 0,
+    "suspicious_count": 0,
+    "ads_count": 0,
+    "has_autorun_inf": false,
+    "has_shortcut_worm": false,
+    "is_clean": true,
+    "findings": [
+      {
+        "severity": "INFO",
+        "path": "D:\\",
+        "reason_ar": "الفلاش نظيف تماماً من البرمجيات الخبيثة، الديدان، ملفات autorun.inf، والملفات التنفيذية المشبوهة.",
+        "reason_en": "Drive is completely clean of malware, shortcut worms, autorun.inf, and suspicious executables."
+      }
+    ],
+    "all_items": [
+      {
+        "path": "D:\\System Volume Information",
+        "size_bytes": 0,
+        "attributes": "drwxrwxrwx",
+        "created_utc": "",
+        "modified_utc": "2026-11-01 11:11:27 UTC"
+      },
+      {
+        "path": "D:\\System Volume Information\\IndexerVolumeGuid",
+        "size_bytes": 76,
+        "attributes": "-rw-rw-rw-",
+        "created_utc": "",
+        "modified_utc": "2026-11-01 11:11:28 UTC"
+      },
+      {
+        "path": "D:\\System Volume Information\\WPSettings.dat",
+        "size_bytes": 12,
+        "attributes": "-rw-rw-rw-",
+        "created_utc": "",
+        "modified_utc": "2026-11-01 11:11:28 UTC"
+      }
+    ]
+  },
+  "speed_metrics": {
+    "tested": true,
+    "test_size_mb": 2,
+    "write_time_sec": 0.07,
+    "write_speed_mbps": 28.46,
+    "read_time_sec": 0.063,
+    "read_speed_mbps": 31.57,
+    "min_chunk_write_ms": 35.1,
+    "max_chunk_write_ms": 35.2,
+    "avg_chunk_write_ms": 35.1,
+    "integrity_verified": true,
+    "nand_quality_estimate": "STANDARD: Mainstream TLC NAND (10 - 35 MB/s write speed)"
+  },
+  "capacity_probe": {
+    "tested": true,
+    "non_destructive_preserved": true,
+    "duration_seconds": 16.12,
+    "is_fake_capacity": true,
+    "failure_mode": "BLACK_HOLE_0xFF",
+    "last_valid_4k_page": 7815919,
+    "first_invalid_4k_page": 7815920,
+    "true_valid_sectors_512": 62527360,
+    "true_capacity_bytes": 32014008320,
+    "true_capacity_gib": 29.8154,
+    "true_capacity_gb": 32.014,
+    "fake_capacity_bytes": 2065137991680,
+    "fake_percentage": 98.47,
+    "grid_probes": [
+      {
+        "index": 0,
+        "offset_gib": 0.25,
+        "physical_byte": 268435456,
+        "physical_lba": 524288,
+        "status": "VALID",
+        "written_tag_hex": "0xCAFEBABE00000000",
+        "read_tag_hex": "0xCAFEBABE00000000",
+        "canary_intact": true,
+        "latency_ms": 1603
+      },
+      {
+        "index": 1,
+        "offset_gib": 1.25,
+        "physical_byte": 1342177280,
+        "physical_lba": 2621440,
+        "status": "VALID",
+        "written_tag_hex": "0xCAFEBABE00000001",
+        "read_tag_hex": "0xCAFEBABE00000001",
+        "canary_intact": true,
+        "latency_ms": 1613.7
+      },
+      {
+        "index": 2,
+        "offset_gib": 2.25,
+        "physical_byte": 2415919104,
+        "physical_lba": 4718592,
+        "status": "VALID",
+        "written_tag_hex": "0xCAFEBABE00000002",
+        "read_tag_hex": "0xCAFEBABE00000002",
+        "canary_intact": true,
+        "latency_ms": 1782.7
+      },
+      {
+        "index": 3,
+        "offset_gib": 3.25,
+        "physical_byte": 3489660928,
+        "physical_lba": 6815744,
+        "status": "VALID",
+        "written_tag_hex": "0xCAFEBABE00000003",
+        "read_tag_hex": "0xCAFEBABE00000003",
+        "canary_intact": true,
+        "latency_ms": 1559.8
+      },
+      {
+        "index": 4,
+        "offset_gib": 4.25,
+        "physical_byte": 4563402752,
+        "physical_lba": 8912896,
+        "status": "VALID",
+        "written_tag_hex": "0xCAFEBABE00000004",
+        "read_tag_hex": "0xCAFEBABE00000004",
+        "canary_intact": true,
+        "latency_ms": 1616.7
+      },
+      {
+        "index": 5,
+        "offset_gib": 6.25,
+        "physical_byte": 6710886400,
+        "physical_lba": 13107200,
+        "status": "VALID",
+        "written_tag_hex": "0xCAFEBABE00000006",
+        "read_tag_hex": "0xCAFEBABE00000006",
+        "canary_intact": true,
+        "latency_ms": 1742.9
+      },
+      {
+        "index": 6,
+        "offset_gib": 7.25,
+        "physical_byte": 7784628224,
+        "physical_lba": 15204352,
+        "status": "VALID",
+        "written_tag_hex": "0xCAFEBABE00000007",
+        "read_tag_hex": "0xCAFEBABE00000007",
+        "canary_intact": true,
+        "latency_ms": 3.1
+      },
+      {
+        "index": 7,
+        "offset_gib": 8.25,
+        "physical_byte": 8858370048,
+        "physical_lba": 17301504,
+        "status": "VALID",
+        "written_tag_hex": "0xCAFEBABE00000008",
+        "read_tag_hex": "0xCAFEBABE00000008",
+        "canary_intact": true,
+        "latency_ms": 3.7
+      },
+      {
+        "index": 8,
+        "offset_gib": 12.25,
+        "physical_byte": 13153337344,
+        "physical_lba": 25690112,
+        "status": "VALID",
+        "written_tag_hex": "0xCAFEBABE0000000C",
+        "read_tag_hex": "0xCAFEBABE0000000C",
+        "canary_intact": true,
+        "latency_ms": 5.5
+      },
+      {
+        "index": 9,
+        "offset_gib": 14.25,
+        "physical_byte": 15300820992,
+        "physical_lba": 29884416,
+        "status": "VALID",
+        "written_tag_hex": "0xCAFEBABE0000000E",
+        "read_tag_hex": "0xCAFEBABE0000000E",
+        "canary_intact": true,
+        "latency_ms": 4.9
+      },
+      {
+        "index": 10,
+        "offset_gib": 15.25,
+        "physical_byte": 16374562816,
+        "physical_lba": 31981568,
+        "status": "VALID",
+        "written_tag_hex": "0xCAFEBABE0000000F",
+        "read_tag_hex": "0xCAFEBABE0000000F",
+        "canary_intact": true,
+        "latency_ms": 5.9
+      },
+      {
+        "index": 11,
+        "offset_gib": 16.25,
+        "physical_byte": 17448304640,
+        "physical_lba": 34078720,
+        "status": "VALID",
+        "written_tag_hex": "0xCAFEBABE00000010",
+        "read_tag_hex": "0xCAFEBABE00000010",
+        "canary_intact": true,
+        "latency_ms": 2.5
+      },
+      {
+        "index": 12,
+        "offset_gib": 20.25,
+        "physical_byte": 21743271936,
+        "physical_lba": 42467328,
+        "status": "VALID",
+        "written_tag_hex": "0xCAFEBABE00000014",
+        "read_tag_hex": "0xCAFEBABE00000014",
+        "canary_intact": true,
+        "latency_ms": 5.5
+      },
+      {
+        "index": 13,
+        "offset_gib": 24.25,
+        "physical_byte": 26038239232,
+        "physical_lba": 50855936,
+        "status": "VALID",
+        "written_tag_hex": "0xCAFEBABE00000018",
+        "read_tag_hex": "0xCAFEBABE00000018",
+        "canary_intact": true,
+        "latency_ms": 2.3
+      },
+      {
+        "index": 14,
+        "offset_gib": 28.25,
+        "physical_byte": 30333206528,
+        "physical_lba": 59244544,
+        "status": "VALID",
+        "written_tag_hex": "0xCAFEBABE0000001C",
+        "read_tag_hex": "0xCAFEBABE0000001C",
+        "canary_intact": true,
+        "latency_ms": 2.1
+      },
+      {
+        "index": 15,
+        "offset_gib": 29.25,
+        "physical_byte": 31406948352,
+        "physical_lba": 61341696,
+        "status": "VALID",
+        "written_tag_hex": "0xCAFEBABE0000001D",
+        "read_tag_hex": "0xCAFEBABE0000001D",
+        "canary_intact": true,
+        "latency_ms": 3
+      },
+      {
+        "index": 16,
+        "offset_gib": 30.25,
+        "physical_byte": 32480690176,
+        "physical_lba": 63438848,
+        "status": "FAKE_VOID_FF",
+        "written_tag_hex": "0xCAFEBABE0000001E",
+        "read_tag_hex": "0xFFFFFFFFFFFFFFFF",
+        "canary_intact": true,
+        "latency_ms": 6.8
+      },
+      {
+        "index": 17,
+        "offset_gib": 31.25,
+        "physical_byte": 33554432000,
+        "physical_lba": 65536000,
+        "status": "FAKE_VOID_FF",
+        "written_tag_hex": "0xCAFEBABE0000001F",
+        "read_tag_hex": "0xFFFFFFFFFFFFFFFF",
+        "canary_intact": true,
+        "latency_ms": 3.6
+      },
+      {
+        "index": 18,
+        "offset_gib": 32.25,
+        "physical_byte": 34628173824,
+        "physical_lba": 67633152,
+        "status": "FAKE_VOID_FF",
+        "written_tag_hex": "0xCAFEBABE00000020",
+        "read_tag_hex": "0xFFFFFFFFFFFFFFFF",
+        "canary_intact": true,
+        "latency_ms": 8.1
+      },
+      {
+        "index": 19,
+        "offset_gib": 48.25,
+        "physical_byte": 51808043008,
+        "physical_lba": 101187584,
+        "status": "FAKE_VOID_FF",
+        "written_tag_hex": "0xCAFEBABE00000030",
+        "read_tag_hex": "0xFFFFFFFFFFFFFFFF",
+        "canary_intact": true,
+        "latency_ms": 7.7
+      },
+      {
+        "index": 20,
+        "offset_gib": 60.25,
+        "physical_byte": 64692944896,
+        "physical_lba": 126353408,
+        "status": "FAKE_VOID_FF",
+        "written_tag_hex": "0xCAFEBABE0000003C",
+        "read_tag_hex": "0xFFFFFFFFFFFFFFFF",
+        "canary_intact": true,
+        "latency_ms": 3.2
+      },
+      {
+        "index": 21,
+        "offset_gib": 63.25,
+        "physical_byte": 67914170368,
+        "physical_lba": 132644864,
+        "status": "FAKE_VOID_FF",
+        "written_tag_hex": "0xCAFEBABE0000003F",
+        "read_tag_hex": "0xFFFFFFFFFFFFFFFF",
+        "canary_intact": true,
+        "latency_ms": 4.5
+      },
+      {
+        "index": 22,
+        "offset_gib": 64.25,
+        "physical_byte": 68987912192,
+        "physical_lba": 134742016,
+        "status": "FAKE_VOID_FF",
+        "written_tag_hex": "0xCAFEBABE00000040",
+        "read_tag_hex": "0xFFFFFFFFFFFFFFFF",
+        "canary_intact": true,
+        "latency_ms": 5.6
+      },
+      {
+        "index": 23,
+        "offset_gib": 96.25,
+        "physical_byte": 103347650560,
+        "physical_lba": 201850880,
+        "status": "FAKE_VOID_FF",
+        "written_tag_hex": "0xCAFEBABE00000060",
+        "read_tag_hex": "0xFFFFFFFFFFFFFFFF",
+        "canary_intact": true,
+        "latency_ms": 5.7
+      },
+      {
+        "index": 24,
+        "offset_gib": 120.25,
+        "physical_byte": 129117454336,
+        "physical_lba": 252182528,
+        "status": "FAKE_VOID_FF",
+        "written_tag_hex": "0xCAFEBABE00000078",
+        "read_tag_hex": "0xFFFFFFFFFFFFFFFF",
+        "canary_intact": true,
+        "latency_ms": 9.9
+      },
+      {
+        "index": 25,
+        "offset_gib": 127.25,
+        "physical_byte": 136633647104,
+        "physical_lba": 266862592,
+        "status": "FAKE_VOID_FF",
+        "written_tag_hex": "0xCAFEBABE0000007F",
+        "read_tag_hex": "0xFFFFFFFFFFFFFFFF",
+        "canary_intact": true,
+        "latency_ms": 7.7
+      },
+      {
+        "index": 26,
+        "offset_gib": 128.25,
+        "physical_byte": 137707388928,
+        "physical_lba": 268959744,
+        "status": "FAKE_VOID_FF",
+        "written_tag_hex": "0xCAFEBABE00000080",
+        "read_tag_hex": "0xFFFFFFFFFFFFFFFF",
+        "canary_intact": true,
+        "latency_ms": 4.6
+      },
+      {
+        "index": 27,
+        "offset_gib": 250.25,
+        "physical_byte": 268703891456,
+        "physical_lba": 524812288,
+        "status": "FAKE_VOID_FF",
+        "written_tag_hex": "0xCAFEBABE000000FA",
+        "read_tag_hex": "0xFFFFFFFFFFFFFFFF",
+        "canary_intact": true,
+        "latency_ms": 9
+      },
+      {
+        "index": 28,
+        "offset_gib": 255.25,
+        "physical_byte": 274072600576,
+        "physical_lba": 535298048,
+        "status": "FAKE_VOID_FF",
+        "written_tag_hex": "0xCAFEBABE000000FF",
+        "read_tag_hex": "0xFFFFFFFFFFFFFFFF",
+        "canary_intact": true,
+        "latency_ms": 7.4
+      },
+      {
+        "index": 29,
+        "offset_gib": 256.25,
+        "physical_byte": 275146342400,
+        "physical_lba": 537395200,
+        "status": "FAKE_VOID_FF",
+        "written_tag_hex": "0xCAFEBABE00000100",
+        "read_tag_hex": "0xFFFFFFFFFFFFFFFF",
+        "canary_intact": true,
+        "latency_ms": 4.1
+      },
+      {
+        "index": 30,
+        "offset_gib": 500.25,
+        "physical_byte": 537139347456,
+        "physical_lba": 1049100288,
+        "status": "FAKE_VOID_FF",
+        "written_tag_hex": "0xCAFEBABE000001F4",
+        "read_tag_hex": "0xFFFFFFFFFFFFFFFF",
+        "canary_intact": true,
+        "latency_ms": 5.7
+      },
+      {
+        "index": 31,
+        "offset_gib": 511.25,
+        "physical_byte": 548950507520,
+        "physical_lba": 1072168960,
+        "status": "FAKE_VOID_FF",
+        "written_tag_hex": "0xCAFEBABE000001FF",
+        "read_tag_hex": "0xFFFFFFFFFFFFFFFF",
+        "canary_intact": true,
+        "latency_ms": 6.3
+      },
+      {
+        "index": 32,
+        "offset_gib": 512.25,
+        "physical_byte": 550024249344,
+        "physical_lba": 1074266112,
+        "status": "FAKE_VOID_FF",
+        "written_tag_hex": "0xCAFEBABE00000200",
+        "read_tag_hex": "0xFFFFFFFFFFFFFFFF",
+        "canary_intact": true,
+        "latency_ms": 4.8
+      },
+      {
+        "index": 33,
+        "offset_gib": 1000.25,
+        "physical_byte": 1074010259456,
+        "physical_lba": 2097676288,
+        "status": "FAKE_VOID_FF",
+        "written_tag_hex": "0xCAFEBABE000003E8",
+        "read_tag_hex": "0xFFFFFFFFFFFFFFFF",
+        "canary_intact": true,
+        "latency_ms": 5
+      },
+      {
+        "index": 34,
+        "offset_gib": 1024.25,
+        "physical_byte": 1099780063232,
+        "physical_lba": 2148007936,
+        "status": "FAKE_VOID_FF",
+        "written_tag_hex": "0xCAFEBABE00000400",
+        "read_tag_hex": "0xFFFFFFFFFFFFFFFF",
+        "canary_intact": true,
+        "latency_ms": 5.4
+      },
+      {
+        "index": 35,
+        "offset_gib": 1500.25,
+        "physical_byte": 1610881171456,
+        "physical_lba": 3146252288,
+        "status": "FAKE_VOID_FF",
+        "written_tag_hex": "0xCAFEBABE000005DC",
+        "read_tag_hex": "0xFFFFFFFFFFFFFFFF",
+        "canary_intact": true,
+        "latency_ms": 5.9
+      },
+      {
+        "index": 36,
+        "offset_gib": 1850.25,
+        "physical_byte": 1986690809856,
+        "physical_lba": 3880255488,
+        "status": "FAKE_VOID_FF",
+        "written_tag_hex": "0xCAFEBABE0000073A",
+        "read_tag_hex": "0xFFFFFFFFFFFFFFFF",
+        "canary_intact": true,
+        "latency_ms": 8.8
+      },
+      {
+        "index": 37,
+        "offset_gib": 1900.25,
+        "physical_byte": 2040377901056,
+        "physical_lba": 3985113088,
+        "status": "FAKE_VOID_FF",
+        "written_tag_hex": "0xCAFEBABE0000076C",
+        "read_tag_hex": "0xFFFFFFFFFFFFFFFF",
+        "canary_intact": true,
+        "latency_ms": 6
+      },
+      {
+        "index": 38,
+        "offset_gib": 1952.25,
+        "physical_byte": 2096212475904,
+        "physical_lba": 4094164992,
+        "status": "FAKE_VOID_FF",
+        "written_tag_hex": "0xCAFEBABE000007A0",
+        "read_tag_hex": "0xFFFFFFFFFFFFFFFF",
+        "canary_intact": true,
+        "latency_ms": 9.7
+      }
+    ],
+    "binary_search_steps": [
+      {
+        "step": 1,
+        "low_page_4k": 7667712,
+        "high_page_4k": 7929856,
+        "mid_page_4k": 7798784,
+        "mid_offset_gib": 29.75,
+        "mid_physical_lba": 62390272,
+        "valid": true,
+        "read_back_hex": "0xA55AA55A00770000"
+      },
+      {
+        "step": 2,
+        "low_page_4k": 7798784,
+        "high_page_4k": 7929856,
+        "mid_page_4k": 7864320,
+        "mid_offset_gib": 30,
+        "mid_physical_lba": 62914560,
+        "valid": false,
+        "read_back_hex": "0xFFFFFFFFFFFFFFFF"
+      },
+      {
+        "step": 3,
+        "low_page_4k": 7798784,
+        "high_page_4k": 7864319,
+        "mid_page_4k": 7831552,
+        "mid_offset_gib": 29.875,
+        "mid_physical_lba": 62652416,
+        "valid": false,
+        "read_back_hex": "0xFFFFFFFFFFFFFFFF"
+      },
+      {
+        "step": 4,
+        "low_page_4k": 7798784,
+        "high_page_4k": 7831551,
+        "mid_page_4k": 7815168,
+        "mid_offset_gib": 29.8125,
+        "mid_physical_lba": 62521344,
+        "valid": true,
+        "read_back_hex": "0xA55AA55A00774000"
+      },
+      {
+        "step": 5,
+        "low_page_4k": 7815168,
+        "high_page_4k": 7831551,
+        "mid_page_4k": 7823360,
+        "mid_offset_gib": 29.8438,
+        "mid_physical_lba": 62586880,
+        "valid": false,
+        "read_back_hex": "0xFFFFFFFFFFFFFFFF"
+      },
+      {
+        "step": 6,
+        "low_page_4k": 7815168,
+        "high_page_4k": 7823359,
+        "mid_page_4k": 7819264,
+        "mid_offset_gib": 29.8281,
+        "mid_physical_lba": 62554112,
+        "valid": false,
+        "read_back_hex": "0xFFFFFFFFFFFFFFFF"
+      },
+      {
+        "step": 7,
+        "low_page_4k": 7815168,
+        "high_page_4k": 7819263,
+        "mid_page_4k": 7817216,
+        "mid_offset_gib": 29.8203,
+        "mid_physical_lba": 62537728,
+        "valid": false,
+        "read_back_hex": "0xFFFFFFFFFFFFFFFF"
+      },
+      {
+        "step": 8,
+        "low_page_4k": 7815168,
+        "high_page_4k": 7817215,
+        "mid_page_4k": 7816192,
+        "mid_offset_gib": 29.8164,
+        "mid_physical_lba": 62529536,
+        "valid": false,
+        "read_back_hex": "0xFFFFFFFFFFFFFFFF"
+      },
+      {
+        "step": 9,
+        "low_page_4k": 7815168,
+        "high_page_4k": 7816191,
+        "mid_page_4k": 7815680,
+        "mid_offset_gib": 29.8145,
+        "mid_physical_lba": 62525440,
+        "valid": true,
+        "read_back_hex": "0xA55AA55A00774200"
+      },
+      {
+        "step": 10,
+        "low_page_4k": 7815680,
+        "high_page_4k": 7816191,
+        "mid_page_4k": 7815936,
+        "mid_offset_gib": 29.8154,
+        "mid_physical_lba": 62527488,
+        "valid": false,
+        "read_back_hex": "0xFFFFFFFFFFFFFFFF"
+      },
+      {
+        "step": 11,
+        "low_page_4k": 7815680,
+        "high_page_4k": 7815935,
+        "mid_page_4k": 7815808,
+        "mid_offset_gib": 29.8149,
+        "mid_physical_lba": 62526464,
+        "valid": true,
+        "read_back_hex": "0xA55AA55A00774280"
+      },
+      {
+        "step": 12,
+        "low_page_4k": 7815808,
+        "high_page_4k": 7815935,
+        "mid_page_4k": 7815872,
+        "mid_offset_gib": 29.8152,
+        "mid_physical_lba": 62526976,
+        "valid": true,
+        "read_back_hex": "0xA55AA55A007742C0"
+      },
+      {
+        "step": 13,
+        "low_page_4k": 7815872,
+        "high_page_4k": 7815935,
+        "mid_page_4k": 7815904,
+        "mid_offset_gib": 29.8153,
+        "mid_physical_lba": 62527232,
+        "valid": true,
+        "read_back_hex": "0xA55AA55A007742E0"
+      },
+      {
+        "step": 14,
+        "low_page_4k": 7815904,
+        "high_page_4k": 7815935,
+        "mid_page_4k": 7815920,
+        "mid_offset_gib": 29.8154,
+        "mid_physical_lba": 62527360,
+        "valid": false,
+        "read_back_hex": "0xFFFFFFFFFFFFFFFF"
+      },
+      {
+        "step": 15,
+        "low_page_4k": 7815904,
+        "high_page_4k": 7815919,
+        "mid_page_4k": 7815912,
+        "mid_offset_gib": 29.8153,
+        "mid_physical_lba": 62527296,
+        "valid": true,
+        "read_back_hex": "0xA55AA55A007742E8"
+      },
+      {
+        "step": 16,
+        "low_page_4k": 7815912,
+        "high_page_4k": 7815919,
+        "mid_page_4k": 7815916,
+        "mid_offset_gib": 29.8154,
+        "mid_physical_lba": 62527328,
+        "valid": true,
+        "read_back_hex": "0xA55AA55A007742EC"
+      },
+      {
+        "step": 17,
+        "low_page_4k": 7815916,
+        "high_page_4k": 7815919,
+        "mid_page_4k": 7815918,
+        "mid_offset_gib": 29.8154,
+        "mid_physical_lba": 62527344,
+        "valid": true,
+        "read_back_hex": "0xA55AA55A007742EE"
+      },
+      {
+        "step": 18,
+        "low_page_4k": 7815918,
+        "high_page_4k": 7815919,
+        "mid_page_4k": 7815919,
+        "mid_offset_gib": 29.8154,
+        "mid_physical_lba": 62527352,
+        "valid": true,
+        "read_back_hex": "0xA55AA55A007742EF"
+      }
+    ]
+  },
+  "repair_plan": {
+    "needed": true,
+    "true_max_bytes": 32014008320,
+    "recommended_safe_bytes": 31037849600,
+    "recommended_safe_gib": 28.91,
+    "recommended_safe_mb": 29600,
+    "quarantined_fake_gib": 1924.22,
+    "windows_diskpart_script": "select disk 1\nclean\ncreate partition primary size=29600\nformat fs=exfat label=\"SAFE_29GB\" quick\nassign letter=D\n",
+    "windows_powershell_cmd": "Clear-Disk -Number 1 -RemoveData -Confirm:$false; New-Partition -DiskNumber 1 -Size (29600MB) -DriveLetter D | Format-Volume -FileSystem exFAT -NewFileSystemLabel 'SAFE_29GB' -Confirm:$false",
+    "linux_parted_cmd": "sudo parted -s \\\\.\\PhysicalDrive1 mklabel msdos mkpart primary 1MiB 29600MiB \u0026\u0026 sudo mkfs.exfat -n SAFE_29GB \\\\.\\PhysicalDrive11",
+    "macos_diskutil_cmd": "diskutil partitionDisk \\\\.\\PhysicalDrive1 MBR ExFAT SAFE_29GB 29600M FreeSpace R"
+  },
+  "trust": {
+    "score": 0,
+    "grade": "F // COUNTERFEIT",
+    "verdict_ar": "فلاش مُزوَّر السعة والتصنيف — السعة الفيزيائية الحقيقية جزء ضئيل من السعة المعلنة (خطر تلف البيانات)",
+    "verdict_en": "COUNTERFEIT STORAGE MEDIA — Physical NAND capacity is a fraction of advertised LBA count (High Data Loss Risk)",
+    "is_authentic": false,
+    "evidence": [
+      {
+        "category": "PHYSICAL_CAPACITY",
+        "status": "FAIL",
+        "impact": -65,
+        "title_ar": "تزوير السعة الفيزيائية (Fake Flash Capacity)",
+        "title_en": "Counterfeit Physical NAND Capacity Detected",
+        "detail_ar": "الفلاش يدّعي سعة 1953.12 GiB (2.10 TB)، بينما الفحص العتادي المباشر بالبحث الثنائي أثبت أن السعة الحقيقية هي 29.815 GiB (32.01 GB) فقط! نسبة السعة الوهمية 98.47%.",
+        "detail_en": "Drive claims 1953.12 GiB (2.10 TB), but hardware binary search proved true physical capacity is only 29.815 GiB (32.01 GB). 98.47% of reported space is phantom void (BLACK_HOLE_0xFF).",
+        "raw_proof": "LastValid4KPage=0x7742EF (Sector 62527359 = 32014008320 bytes) | FirstInvalid4KPage=0x7742F0 -\u003e Read=0xFFFFFFFFFFFFFFFF"
+      },
+      {
+        "category": "CONTROLLER_IDENTITY",
+        "status": "FAIL",
+        "impact": -25,
+        "title_ar": "متحكم صيني مقلد معروف (Known MPtool Fake Template)",
+        "title_en": "Known Counterfeit MPtool Controller Signature",
+        "detail_ar": "المعرف 048D:1234 هو أشهر قالب افتراضي للمتحكمات الصينية الرخيصة (FirstChip / Chipsbank) المستخدمة في الفلاشات المزورة التي تنتحل سعات 1TB و2TB وأسماء مثل Flash Disk 3.0 أو VendorCo ProductCode.",
+        "detail_en": "VID 048D / PID 1234 is the single most notorious default factory template for cheap Chinese controllers (FirstChip FC1178/FC1179 \u0026 Chipsbank CBM2199) used in fake-capacity 1TB/2TB flash drives.",
+        "raw_proof": "VID=048D PID=1234 SCSI='Flash Disk 3.0' Rev='2.00'"
+      },
+      {
+        "category": "USB_GENERATION",
+        "status": "FAIL",
+        "impact": -15,
+        "title_ar": "تزييف جيل الـ USB (يدّعي USB 3.0 وهو فعلياً USB 2.0)",
+        "title_en": "Fake USB 3.0 Marketing Claim (Hardware is USB 2.0)",
+        "detail_ar": "الفلاش يحمل اسم 'Disk 3.0' لإيهام المشتري بأنه USB 3.0، لكنه متصل فيزيائياً عبر خطوط High-Speed USB 2.0 (\\_SB.PC00.XHCI.RHUB.HS08) وبإصدار عتادي REV_0200.",
+        "detail_en": "Device advertises 'Disk 3.0' (USB 3.0), but enumerates on USB 2.0 High-Speed bus (\\_SB.PC00.XHCI.RHUB.HS08) with hardware revision REV_0200.",
+        "raw_proof": "PNP=USB\\VID_048D\u0026PID_1234\\9112511085014663328 | BIOS=\\_SB.PC00.XHCI.RHUB.HS08 | Rev=0200"
+      },
+      {
+        "category": "BOOT_FORENSICS",
+        "status": "FAIL",
+        "impact": -15,
+        "title_ar": "بصمة أداة حقن السعة المصنعية (MPtool LBA-32 \u0026 Synthetic Sectors)",
+        "title_en": "Factory Capacity-Spoofing MPtool Partition Fingerprint",
+        "detail_ar": "القسم يبدأ عند القطاع LBA 32 (بدلاً من محاذاة ويندوز القياسية LBA 2048)، وعدد القطاعات الكلي (4096000000) هو رقم دائري اصطناعي من أداة MPtool.",
+        "detail_en": "Partition starts at LBA 32 (instead of standard OS LBA 2048 alignment), and total sector count (4096000000) matches a synthetic MPtool round formula.",
+        "raw_proof": "PartitionStartLBA=32 | ReadCapacityHex=F423FFFF00000200 | MBRPart1=8001010007FEFFFF20000000E0FF23F4"
+      },
+      {
+        "category": "NAND_PERFORMANCE",
+        "status": "PASS",
+        "impact": 0,
+        "title_ar": "سرعة قراءة وكتابة طبيعية (Write: 28.46 MB/s | Read: 31.57 MB/s)",
+        "title_en": "Healthy Hardware Read/Write Speed (Write: 28.46 MB/s | Read: 31.57 MB/s)",
+        "detail_ar": "STANDARD: Mainstream TLC NAND (10 - 35 MB/s write speed)",
+        "detail_en": "STANDARD: Mainstream TLC NAND (10 - 35 MB/s write speed)",
+        "raw_proof": "Write=28.46 MB/s | Read=31.57 MB/s"
+      },
+      {
+        "category": "SECURITY_MALWARE",
+        "status": "PASS",
+        "impact": 0,
+        "title_ar": "الفلاش نظيف أمنياً وخالٍ من الفيروسات والملفات المخفية المشبوهة",
+        "title_en": "Drive is Clean of Malware, Worms, and Suspicious Hidden Files",
+        "detail_ar": "لم يتم العثور على أي برمجيات خبيثة أو ملفات autorun.inf أو اختصارات .lnk أو ملفات محذوفة مسبقاً في العنقود الجذري.",
+        "detail_en": "Zero malware, autorun.inf, .lnk worms, or prior deleted files found in raw root directory cluster.",
+        "raw_proof": "TotalFiles=3 | Suspicious=0 | PriorDeleted=3"
+      }
+    ]
+  }
+}

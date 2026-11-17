@@ -26,35 +26,46 @@ Traditional tools (such as `H2testw`, `F3`, or `ValiDrive`) either take hours to
 
 ---
 
-## Real-World Forensic Case Study (2TB Counterfeit Drive Unmasked in 1.19s)
+## Empirical Hardware Forensics Case Studies (Real-World Counterfeits Unmasked in < 1.2s)
+
+See **[CASE_STUDIES.md](CASE_STUDIES.md)** for our full forensic investigation, 18-step $O(\log N)$ binary search traces, and raw JSON telemetry datasets ([`case-01-2tb-usb3-flash-drive.json`](docs/case-studies/case-01-2tb-usb3-flash-drive.json) & [`case-02-500gb-external-ssd.json`](docs/case-studies/case-02-500gb-external-ssd.json)).
+
+| Forensic Metric | Case Study #1: Fake "2.0 TB USB 3.0 Flash Drive" | Case Study #2: Fake "500 GB Portable External SSD" |
+| :--- | :--- | :--- |
+| **Report ID** | [`FT-0EA813AE7334`](docs/case-studies/case-01-2tb-usb3-flash-drive.json) | [`FT-6251FDAB06FD`](docs/case-studies/case-02-500gb-external-ssd.json) |
+| **Advertised Product** | `2.0 TB` (`1953.13 GiB`) SuperSpeed USB 3.0 Drive | `500 GB` (`500.98 GiB`) External Portable SSD (`Label: SSD`) |
+| **True Physical NAND** | **`29.815 GiB` (`32.01 GB`)** *(32 GB nominal die)* | **`58.495 GiB` (`62.81 GB`)** *(64 GB nominal die)* |
+| **Phantom Void Ratio** | **`98.47%` Fake** (`BLACK_HOLE_0xFF` past Page `0x7742EF`) | **`88.32%` Fake** (`BLACK_HOLE_0xFF` past Page `0xE9FAFF`) |
+| **True Hardware Identity** | `FirstChip FC1178/FC1179` (`VID_048D&PID_1234`, `REV_0200`) | **Not an SSD!** `FirstChip FC1178/FC1179` USB 2.0 thumb drive glued inside an SSD shell (`RMB=1`, `VendorCo ProductCode`) |
+| **True DMA Speed** | **`0.30 – 2.26 MB/s` Write** / `30.57 MB/s` Read (USB 2.0 HS) | **`5.18 MB/s` Write** / `23.26 MB/s` Read (USB 2.0 HS) |
+| **Shared Factory MPtool Signature** | `MBR Sig: 33B82CFA` \| `exFAT VSN: 76E8CACF` | `MBR Sig: 33B82CFA` \| `exFAT VSN: 76E8CACF` *(Identical Factory Clone!)* |
+| **Detection Time** | **`1.19 seconds`** | **`0.70 seconds`** |
 
 ```text
-================================================================================
-  FlashTruth v1.0 — Cross-Platform USB Hardware Forensics & Capacity Verifier
-  Runtime: windows/amd64 | Direct DMA + SCSI Pass-Through + O(log N) Binary Search
-================================================================================
-  REPORT ID      : FT-0EA813AE7334
-  TRUST SCORE    : 0 / 100  [F (COUNTERFEIT)]
-  VERDICT        : COUNTERFEIT DRIVE — Physical NAND is a tiny fraction of claimed capacity!
+--------------------------------------------------------------------------------
+  REPORT ID      : FT-6251FDAB06FD  (Case Study #2: Fake "500 GB External SSD")
+  TRUST SCORE    : 0 / 100  [F // COUNTERFEIT]
+  VERDICT        : COUNTERFEIT STORAGE MEDIA — Physical NAND capacity is a fraction of advertised LBA count (High Data Loss Risk)
 --------------------------------------------------------------------------------
   [1] STORAGE HARDWARE, OEM & CONTROLLER IDENTITY
       Bus & Media Type   : USB / Removable Flash (Firmware: 2.00, Health: Healthy)
-      Hardware Model     : Flash Disk 3.0
+      Hardware Model     : VendorCo ProductCode
       OEM Manufacturer   : Integrated Technology Express, Inc. (ITE)
       Controller / Bridge: FirstChip FC1178BC / FC1179 or Chipsbank CBM2199 (Generic MPtool Template)
       IEEE OUI / VID:PID : USB-IF VID:048D PID:1234 (VID:048D PID:1234 Rev:0200)
-      Serial Number      : 9112511085014663328
-      BIOS / ACPI Path   : \_SB.PC00.XHCI.RHUB.HS08
-      Negotiated Speed   : High-Speed (USB 2.0 — 480 Mbps) (Fake USB 3.0 Claim: true)
-      SCSI Inquiry       : 'Flash' / 'Disk 3.0' (Rev '2.00')
-      SCSI READ CAPACITY : 0xF423FFFF00000200 (4096000000 sectors)
+      BIOS / ACPI Path   : \_SB.PC00.XHCI.RHUB.HS08 (High-Speed USB 2.0 - 480 Mbps Max)
+      SCSI READ CAPACITY : 0x3E9F3FFF00000200 (1050624000 sectors = exact 513,000 MiB synthetic round)
 
-  [4] PHYSICAL NAND CAPACITY (NON-DESTRUCTIVE BINARY SEARCH IN 1.19s)
-      Reported Capacity  :  1953.12 GiB ( 2097.15 GB | 2097152000000 bytes)
-      True NAND Capacity :   29.815 GiB (   32.01 GB | 32014008320 bytes)
-      Last Valid 4K Page : 0x7742EF (7815919) | Last Valid 512B Sector: 62527359
-      First Invalid Page : 0x7742F0 (7815920) | Failure Mode: BLACK_HOLE_0xFF
-      Fake Phantom Ratio : 98.47% (2065137991680 bytes fake)
+  [3] TRUE HARDWARE UNBUFFERED DMA SPEED
+      True Write Speed   : 5.18 MB/s (Avg 1MB Latency: 193.0 ms, Max: 604.4 ms)
+      True Read Speed    : 23.26 MB/s (Integrity Verified: true)
+
+  [4] PHYSICAL NAND CAPACITY (NON-DESTRUCTIVE BINARY SEARCH IN 0.70s)
+      Reported Capacity  :   500.98 GiB (  537.92 GB | 537919455232 bytes)
+      True NAND Capacity :   58.495 GiB (   62.81 GB | 62808653824 bytes)
+      Last Valid 4K Page : 0xE9FAFF (15334143) | Last Valid 512B Sector: 122673151
+      First Invalid Page : 0xE9FB00 (15334144) | Failure Mode: BLACK_HOLE_0xFF
+      Fake Phantom Ratio : 88.32% (475110801408 bytes fake)
       Data Preserved     : true (100% Non-Destructive Rollback)
 ```
 
